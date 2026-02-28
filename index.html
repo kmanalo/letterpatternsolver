@@ -1,24 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Letter Pattern Solver</title>
-
 <style>
-
 :root{
   --bg:#f4f7f8;
   --card:#ffffff;
   --ink:#12343b;
   --muted:#6b7c80;
   --accent:#0f4c5c;
+  --accent2:#0c3b4a;
   --border:#d9e2e6;
+  --shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
-
-*{
-  box-sizing:border-box;
-}
+*{ box-sizing:border-box; }
 
 body{
   margin:0;
@@ -29,55 +26,69 @@ body{
 }
 
 .container{
-  max-width:480px;
+  max-width:520px;
   margin:0 auto;
 }
 
 .card{
   background:var(--card);
-  border-radius:18px;
+  border-radius:22px;
   padding:22px;
-  box-shadow:0 4px 16px rgba(0,0,0,0.08);
+  box-shadow:var(--shadow);
+  border:1px solid rgba(0,0,0,0.03);
 }
 
 h1{
   text-align:center;
   margin:0 0 18px;
-  font-size:28px;
+  font-size:34px;
+  letter-spacing:0.2px;
+  color:#0f3d48;
 }
 
-.length-select{
-  display:flex;
-  justify-content:center;
-  margin-bottom:18px;
-}
+.row-center{ display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
 
 select{
-  padding:10px 16px;
+  padding:10px 14px;
   font-size:16px;
-  border-radius:10px;
+  border-radius:12px;
   border:2px solid var(--border);
   background:white;
 }
+
+.toggle{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  padding:8px 10px;
+  border:2px solid var(--border);
+  border-radius:12px;
+  background:#fff;
+  font-size:14px;
+  color:var(--muted);
+}
+.toggle input{ transform: scale(1.1); }
 
 .boxes{
   display:flex;
   justify-content:center;
   gap:8px;
-  margin-bottom:18px;
+  margin:18px 0 18px;
+  flex-wrap:nowrap; /* always 1 row */
 }
 
 .box{
-  width:clamp(44px,calc((100vw - 36px - 44px - 32px)/5),72px);
-  height:clamp(44px,calc((100vw - 36px - 44px - 32px)/5),72px);
+  width: clamp(44px, calc((100vw - 18px*2 - 22px*2 - 8px*4) / 5), 72px);
+  height: clamp(44px, calc((100vw - 18px*2 - 22px*2 - 8px*4) / 5), 72px);
   border:2px solid var(--border);
-  border-radius:12px;
+  border-radius:14px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:26px;
-  font-weight:600;
+  font-size: clamp(18px, 5vw, 30px);
+  font-weight:650;
   background:white;
+  color:#163d45;
 }
 
 label{
@@ -85,195 +96,295 @@ label{
   color:var(--muted);
   display:block;
   margin-top:14px;
-  margin-bottom:4px;
+  margin-bottom:6px;
+  letter-spacing:0.4px;
 }
 
 input{
   width:100%;
-  padding:12px;
-  border-radius:10px;
+  padding:12px 12px;
+  border-radius:12px;
   border:2px solid var(--border);
   font-size:16px;
+  outline:none;
 }
 
 button{
   width:100%;
   margin-top:18px;
-  padding:14px;
-  background:var(--accent);
+  padding:16px 14px;
+  background:linear-gradient(180deg,var(--accent),var(--accent2));
   color:white;
   border:none;
-  border-radius:12px;
-  font-size:18px;
-  font-weight:600;
+  border-radius:16px;
+  font-size:20px;
+  font-weight:700;
+  box-shadow:0 14px 30px rgba(15,76,92,0.22);
 }
 
-button:active{
-  transform:scale(0.98);
-}
+button:active{ transform: translateY(1px); }
 
-.results{
-  margin-top:18px;
-}
-
-.results-header{
+.meta{
   display:flex;
   justify-content:space-between;
-  margin-bottom:10px;
+  align-items:center;
+  margin-top:14px;
+  color:var(--muted);
+  font-size:14px;
 }
 
+.meta a{ color:var(--muted); text-decoration:underline; cursor:pointer; }
+
 .words{
+  margin-top:12px;
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:10px;
 }
 
 .word{
-  padding:10px;
+  padding:10px 10px;
   text-align:center;
-  border-radius:10px;
+  border-radius:12px;
   border:2px solid var(--border);
   background:white;
-  font-weight:600;
-  letter-spacing:1px;
+  font-weight:700;
+  letter-spacing:2px;
+  color:#173f47;
+  user-select:none;
 }
 
+.status{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:13px;
+  text-align:center;
+}
+
+.footer{
+  margin-top:14px;
+  text-align:center;
+  color:var(--muted);
+  font-size:12px;
+}
+
+@media (max-width: 430px){
+  h1{ font-size:28px; }
+  .words{ grid-template-columns:repeat(2,1fr); }
+}
 </style>
 </head>
 
 <body>
-
 <div class="container">
+  <div class="card">
+    <h1>Fill-in-the-Blanks Search</h1>
 
-<div class="card">
+    <div class="row-center">
+      <select id="length" disabled>
+        <option value="5" selected>5 letters</option>
+      </select>
 
-<h1>Fill-in-the-Blanks Search</h1>
+      <label class="toggle" title="Answers only searches the official solution list. All valid guesses includes accepted non-solution words too.">
+        <input type="checkbox" id="useAll" />
+        All valid guesses
+      </label>
+    </div>
 
-<div class="length-select">
-<select id="length">
-<option value="5">5 letters</option>
-</select>
-</div>
+    <div class="boxes" id="boxes"></div>
 
-<div class="boxes" id="boxes"></div>
+    <label>PATTERN (_ = unknown)</label>
+    <input id="pattern" placeholder="_____" maxlength="5" autocapitalize="none" spellcheck="false" />
 
-<label>PATTERN (_ = unknown)</label>
-<input id="pattern" placeholder="_____" maxlength="5">
+    <label>INCLUDE LETTERS (yellow)</label>
+    <input id="include" autocapitalize="none" spellcheck="false" />
 
-<label>INCLUDE LETTERS (yellow)</label>
-<input id="include">
+    <label>EXCLUDE LETTERS (gray)</label>
+    <input id="exclude" autocapitalize="none" spellcheck="false" />
 
-<label>EXCLUDE LETTERS (gray)</label>
-<input id="exclude">
+    <button id="searchBtn">Search</button>
 
-<button onclick="search()">Search</button>
+    <div class="meta">
+      <span id="count">0 viable words</span>
+      <a id="resetLink">Reset</a>
+    </div>
 
-<div class="results">
-<div class="results-header">
-<span id="count"></span>
-<span onclick="reset()" style="cursor:pointer;color:var(--muted)">Reset</span>
-</div>
+    <div class="words" id="results"></div>
+    <div class="status" id="status">Loading word lists…</div>
 
-<div class="words" id="results"></div>
-</div>
-
-</div>
+    <div class="footer">Not affiliated with Wordle or The New York Times.</div>
+  </div>
 </div>
 
 <script>
+const $ = (id) => document.getElementById(id);
 
-const WORDS = [
-"abase","abate","awake","batty","bench","blush","cigar",
-"colon","crust","death","dwarf","evade","feign","focal",
-"fresh","grade","heath","humph","model","naval","quiet"
-];
+let ANSWERS = [];
+let ALLOWED = [];
+let READY = false;
 
-function updateBoxes(){
+function normalizeLetters(s){ return (s || "").toLowerCase().replace(/[^a-z]/g, ""); }
 
-const pattern=document.getElementById("pattern").value;
-const boxes=document.getElementById("boxes");
-
-boxes.innerHTML="";
-
-for(let i=0;i<5;i++){
-
-const div=document.createElement("div");
-div.className="box";
-div.textContent=pattern[i]||"";
-boxes.appendChild(div);
-
+function normalizePattern(p){
+  const s = (p || "").toLowerCase().replace(/[^a-z_]/g, "");
+  return (s.length ? s.padEnd(5, "_").slice(0,5) : "_____");
 }
 
+function renderBoxes(pattern){
+  const boxes = $("boxes");
+  boxes.innerHTML = "";
+  for(let i=0;i<5;i++){
+    const div = document.createElement("div");
+    div.className = "box";
+    const c = pattern[i];
+    div.textContent = (c && c !== "_") ? c.toUpperCase() : "";
+    boxes.appendChild(div);
+  }
 }
 
-document.getElementById("pattern").addEventListener("input",updateBoxes);
-
-updateBoxes();
-
-function search(){
-
-const pattern=document.getElementById("pattern").value.toLowerCase();
-const include=document.getElementById("include").value.toLowerCase();
-const exclude=document.getElementById("exclude").value.toLowerCase();
-
-const results=WORDS.filter(word=>{
-
-if(pattern){
-
-for(let i=0;i<pattern.length;i++){
-if(pattern[i]!="_" && pattern[i]!=word[i]) return false;
+function parseWordFile(text){
+  return text
+    .split(/\r?\n/)
+    .map(s => s.trim().toLowerCase())
+    .filter(w => /^[a-z]{5}$/.test(w));
 }
 
+async function loadLists(){
+  try{
+    const [a, g] = await Promise.all([
+      fetch("/data/answers.txt", { cache: "no-store" }),
+      fetch("/data/allowed.txt", { cache: "no-store" })
+    ]);
+
+    if(!a.ok) throw new Error("answers.txt not found (did you commit data/answers.txt?)");
+    if(!g.ok) throw new Error("allowed.txt not found (did you commit data/allowed.txt?)");
+
+    const answersText = await a.text();
+    const allowedText = await g.text();
+
+    ANSWERS = parseWordFile(answersText);
+    ALLOWED = parseWordFile(allowedText);
+
+    READY = true;
+    $("status").textContent = `Loaded ${ANSWERS.length.toLocaleString()} answers + ${ALLOWED.length.toLocaleString()} allowed guesses.`;
+
+    // restore prior state
+    try{
+      const s = JSON.parse(localStorage.getItem("lps_state") || "{}");
+      if (typeof s.useAll === "boolean") $("useAll").checked = s.useAll;
+      if (s.pattern) $("pattern").value = s.pattern;
+      if (s.include) $("include").value = s.include;
+      if (s.exclude) $("exclude").value = s.exclude;
+    }catch{}
+
+    solve();
+  }catch(err){
+    $("status").textContent = "Word lists failed to load: " + err.message;
+  }
 }
 
-for(const c of include){
-if(!word.includes(c)) return false;
+function getActiveList(){
+  if (!$("useAll").checked) return ANSWERS;
+
+  // union answers + allowed (avoid duplicates)
+  const set = new Set(ANSWERS);
+  for(const w of ALLOWED) set.add(w);
+  return Array.from(set);
 }
 
-for(const c of exclude){
-if(word.includes(c)) return false;
-}
+function filterWords({ pattern, include, exclude }){
+  const pat = normalizePattern(pattern);
+  const inc = new Set(normalizeLetters(include).split(""));
+  const exc = new Set(normalizeLetters(exclude).split(""));
 
-return true;
+  const list = getActiveList();
 
-});
+  return list.filter(word => {
+    // pattern
+    for(let i=0;i<5;i++){
+      if(pat[i] !== "_" && word[i] !== pat[i]) return false;
+    }
+    // exclude
+    for(const c of exc) if(word.includes(c)) return false;
+    // include
+    for(const c of inc) if(!word.includes(c)) return false;
 
-renderResults(results);
-
+    return true;
+  }).sort();
 }
 
 function renderResults(words){
+  $("count").textContent = `${words.length} viable words`;
+  const container = $("results");
+  container.innerHTML = "";
 
-document.getElementById("count").textContent=
-words.length+" viable words";
+  for(const w of words){
+    const div = document.createElement("div");
+    div.className = "word";
+    div.textContent = w.toUpperCase();
+    div.addEventListener("click", async () => {
+      try{
+        await navigator.clipboard.writeText(w);
+        $("status").textContent = `Copied ${w.toUpperCase()} to clipboard.`;
+        setTimeout(() => {
+          if (READY) $("status").textContent = `Loaded ${ANSWERS.length.toLocaleString()} answers + ${ALLOWED.length.toLocaleString()} allowed guesses.`;
+        }, 1200);
+      }catch{
+        // clipboard may fail on some iOS contexts; ignore
+      }
+    });
+    container.appendChild(div);
+  }
+}
 
-const container=document.getElementById("results");
+function saveState(){
+  localStorage.setItem("lps_state", JSON.stringify({
+    useAll: $("useAll").checked,
+    pattern: $("pattern").value,
+    include: $("include").value,
+    exclude: $("exclude").value
+  }));
+}
 
-container.innerHTML="";
+function solve(){
+  if(!READY) return;
+  const pat = normalizePattern($("pattern").value);
+  renderBoxes(pat);
 
-words.forEach(w=>{
+  const words = filterWords({
+    pattern: pat,
+    include: $("include").value,
+    exclude: $("exclude").value
+  });
 
-const div=document.createElement("div");
-div.className="word";
-div.textContent=w.toUpperCase();
-container.appendChild(div);
+  renderResults(words);
+  saveState();
+}
 
+function resetAll(){
+  $("pattern").value = "";
+  $("include").value = "";
+  $("exclude").value = "";
+  $("useAll").checked = false;
+  localStorage.removeItem("lps_state");
+  renderBoxes("_____");
+  $("results").innerHTML = "";
+  $("count").textContent = "0 viable words";
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderBoxes("_____");
+
+  $("searchBtn").addEventListener("click", solve);
+  $("resetLink").addEventListener("click", resetAll);
+
+  ["pattern","include","exclude","useAll"].forEach(id => {
+    $(id).addEventListener("input", solve);
+    $(id).addEventListener("change", solve);
+  });
+
+  loadLists();
 });
-
-}
-
-function reset(){
-
-document.getElementById("pattern").value="";
-document.getElementById("include").value="";
-document.getElementById("exclude").value="";
-document.getElementById("results").innerHTML="";
-document.getElementById("count").textContent="";
-updateBoxes();
-
-}
-
 </script>
-
 </body>
 </html>
