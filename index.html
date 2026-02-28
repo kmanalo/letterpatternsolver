@@ -1,388 +1,279 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Letter Pattern Solver</title>
-  <style>
-    :root{
-      --bg:#f4f6f8;
-      --card:#ffffff;
-      --ink:#0f2d3a;
-      --muted:#6b7b85;
-      --border:#dfe5ea;
-      --shadow: 0 10px 30px rgba(15,45,58,.12);
-      --radius:18px;
-      --btn:#0f4a5c;
-      --btn2:#0c3b4a;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Letter Pattern Solver</title>
 
-    html,body{height:100%;}
-    body{
-      margin:0;
-      font-family: var(--sans);
-      background: var(--bg);
-      color: var(--ink);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:18px;
-    }
+<style>
 
-    .wrap{
-      width:min(860px, 100%);
-    }
+:root{
+  --bg:#f4f7f8;
+  --card:#ffffff;
+  --ink:#12343b;
+  --muted:#6b7c80;
+  --accent:#0f4c5c;
+  --border:#d9e2e6;
+}
 
-    .card{
-      background: var(--card);
-      border:1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 22px;
-    }
+*{
+  box-sizing:border-box;
+}
 
-    .title{
-      text-align:center;
-      font-size: 34px;
-      line-height:1.1;
-      letter-spacing:.2px;
-      margin: 4px 0 18px;
-      font-weight: 750;
-      color: var(--ink);
-    }
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  padding:18px;
+}
 
-    .subrow{
-      display:flex;
-      justify-content:center;
-      margin-bottom: 18px;
-    }
+.container{
+  max-width:480px;
+  margin:0 auto;
+}
 
-    select{
-      appearance:none;
-      -webkit-appearance:none;
-      -moz-appearance:none;
-      background:#fff;
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding: 14px 46px 14px 16px;
-      font-size: 22px;
-      font-weight:700;
-      color: var(--ink);
-      box-shadow: 0 4px 14px rgba(15,45,58,.08);
-      position:relative;
-      outline:none;
-    }
+.card{
+  background:var(--card);
+  border-radius:18px;
+  padding:22px;
+  box-shadow:0 4px 16px rgba(0,0,0,0.08);
+}
 
-    .selectWrap{
-      position:relative;
-      display:inline-block;
-    }
-    .selectWrap:after{
-      content:"▾";
-      position:absolute;
-      right:14px;
-      top:50%;
-      transform: translateY(-50%);
-      color: var(--muted);
-      font-size: 18px;
-      pointer-events:none;
-    }
+h1{
+  text-align:center;
+  margin:0 0 18px;
+  font-size:28px;
+}
 
-    .boxes{
-      display:flex;
-      justify-content:center;
-      gap: 12px;
-      margin: 8px 0 18px;
-      flex-wrap:wrap;
-    }
+.length-select{
+  display:flex;
+  justify-content:center;
+  margin-bottom:18px;
+}
 
-    .box{
-      width:72px;
-      height:72px;
-      border-radius:12px;
-      border:2px solid var(--border);
-      background:#fff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-family: var(--mono);
-      font-size: 30px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      user-select:none;
-    }
+select{
+  padding:10px 16px;
+  font-size:16px;
+  border-radius:10px;
+  border:2px solid var(--border);
+  background:white;
+}
 
-    .controls{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      margin: 0 auto 14px;
-      width: min(560px, 100%);
-    }
+.boxes{
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  margin-bottom:18px;
+}
 
-    .field{
-      display:grid;
-      gap:6px;
-    }
-    .label{
-      font-size: 12px;
-      color: var(--muted);
-      font-weight:600;
-      letter-spacing:.2px;
-      text-transform: uppercase;
-    }
+.box{
+  width:clamp(44px,calc((100vw - 36px - 44px - 32px)/5),72px);
+  height:clamp(44px,calc((100vw - 36px - 44px - 32px)/5),72px);
+  border:2px solid var(--border);
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:26px;
+  font-weight:600;
+  background:white;
+}
 
-    input{
-      border:1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 14px;
-      font-size: 16px;
-      outline:none;
-    }
+label{
+  font-size:13px;
+  color:var(--muted);
+  display:block;
+  margin-top:14px;
+  margin-bottom:4px;
+}
 
-    .btnRow{
-      display:flex;
-      justify-content:center;
-      margin-top: 6px;
-    }
+input{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:2px solid var(--border);
+  font-size:16px;
+}
 
-    button{
-      width:min(560px, 100%);
-      border:none;
-      border-radius: 16px;
-      padding: 16px 18px;
-      font-size: 18px;
-      font-weight: 750;
-      color:#fff;
-      background: linear-gradient(180deg, var(--btn), var(--btn2));
-      box-shadow: 0 14px 30px rgba(15,74,92,.25);
-      cursor:pointer;
-    }
-    button:active{ transform: translateY(1px); }
+button{
+  width:100%;
+  margin-top:18px;
+  padding:14px;
+  background:var(--accent);
+  color:white;
+  border:none;
+  border-radius:12px;
+  font-size:18px;
+  font-weight:600;
+}
 
-    .meta{
-      width:min(560px, 100%);
-      margin: 16px auto 10px;
-      color: var(--muted);
-      font-size: 14px;
-      display:flex;
-      justify-content:space-between;
-      gap: 10px;
-      flex-wrap:wrap;
-    }
+button:active{
+  transform:scale(0.98);
+}
 
-    .results-grid{
-      width:min(760px, 100%);
-      margin: 0 auto;
-      display:grid;
-      grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
-      gap: 10px;
-    }
+.results{
+  margin-top:18px;
+}
 
-    .word-tile{
-      border:1px solid var(--border);
-      border-radius: 12px;
-      background:#fff;
-      padding: 10px 10px;
-      text-align:center;
-      font-family: var(--mono);
-      letter-spacing: 2px;
-      font-size: 14px;
-    }
+.results-header{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
 
-    .footer{
-      text-align:center;
-      margin-top: 14px;
-      color: var(--muted);
-      font-size: 12px;
-    }
+.words{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
 
-    /* Mobile tweaks */
-    @media (max-width: 430px){
-      .title{ font-size: 26px; }
-      .box{ width:58px; height:58px; font-size:26px; }
-      select{ font-size:18px; }
-    }
-  </style>
+.word{
+  padding:10px;
+  text-align:center;
+  border-radius:10px;
+  border:2px solid var(--border);
+  background:white;
+  font-weight:600;
+  letter-spacing:1px;
+}
+
+</style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="card">
-      <div class="title">Fill-in-the-Blanks Search</div>
 
-      <div class="subrow">
-        <div class="selectWrap">
-          <select id="len">
-            <option value="5" selected>5 Letters</option>
-            <option value="4">4 Letters</option>
-            <option value="6">6 Letters</option>
-            <option value="7">7 Letters</option>
-            <option value="8">8 Letters</option>
-          </select>
-        </div>
-      </div>
+<div class="container">
 
-      <div class="boxes" id="boxes"></div>
+<div class="card">
 
-      <div class="controls">
-        <div class="field">
-          <div class="label">Pattern (use _ for unknown)</div>
-          <input id="pattern" placeholder="_____" maxlength="8" autocapitalize="none" spellcheck="false" />
-        </div>
+<h1>Fill-in-the-Blanks Search</h1>
 
-        <div class="field">
-          <div class="label">Include letters (yellow)</div>
-          <input id="include" placeholder="rt" autocapitalize="none" spellcheck="false" />
-        </div>
+<div class="length-select">
+<select id="length">
+<option value="5">5 letters</option>
+</select>
+</div>
 
-        <div class="field">
-          <div class="label">Exclude letters (gray)</div>
-          <input id="exclude" placeholder="snl" autocapitalize="none" spellcheck="false" />
-        </div>
-      </div>
+<div class="boxes" id="boxes"></div>
 
-      <div class="btnRow">
-        <button id="searchBtn">Search</button>
-      </div>
+<label>PATTERN (_ = unknown)</label>
+<input id="pattern" placeholder="_____" maxlength="5">
 
-      <div class="meta">
-        <div id="count">0 viable words</div>
-        <div><a id="reset" href="javascript:void(0)" style="color:inherit;">Reset</a></div>
-      </div>
+<label>INCLUDE LETTERS (yellow)</label>
+<input id="include">
 
-      <div id="results" class="results-grid"></div>
+<label>EXCLUDE LETTERS (gray)</label>
+<input id="exclude">
 
-      <div class="footer">
-        Not affiliated with Wordle or The New York Times.
-      </div>
-    </div>
-  </div>
+<button onclick="search()">Search</button>
 
-  <script>
-    // Starter list (replace later with full Wordle lists)
-    const WORDS = [
-      "cigar","rebut","sissy","humph","awake","blush","focal","evade","naval","serve",
-      "heath","dwarf","model","karma","stink","grade","quiet","bench","abate","feign",
-      "major","death","fresh","crust","stool","colon","abase","marry","react","batty"
-    ];
+<div class="results">
+<div class="results-header">
+<span id="count"></span>
+<span onclick="reset()" style="cursor:pointer;color:var(--muted)">Reset</span>
+</div>
 
-    const $ = (id) => document.getElementById(id);
+<div class="words" id="results"></div>
+</div>
 
-    function normalizeLetters(s) {
-      return (s || "").toLowerCase().replace(/[^a-z]/g, "");
-    }
+</div>
+</div>
 
-    function normalizePattern(p, n) {
-      const s = (p || "").toLowerCase().replace(/[^a-z_]/g, "");
-      const filled = s.length ? s.padEnd(n, "_").slice(0, n) : "_".repeat(n);
-      return filled;
-    }
+<script>
 
-    function renderBoxes(pattern) {
-      const host = $("boxes");
-      host.innerHTML = "";
-      for (let i = 0; i < pattern.length; i++) {
-        const d = document.createElement("div");
-        d.className = "box";
-        d.textContent = (pattern[i] === "_") ? "" : pattern[i].toUpperCase();
-        host.appendChild(d);
-      }
-    }
+const WORDS = [
+"abase","abate","awake","batty","bench","blush","cigar",
+"colon","crust","death","dwarf","evade","feign","focal",
+"fresh","grade","heath","humph","model","naval","quiet"
+];
 
-    function filterWords({ pattern, include, exclude, n }) {
-      const must = new Set(normalizeLetters(include).split(""));
-      const no = new Set(normalizeLetters(exclude).split(""));
-      const pat = normalizePattern(pattern, n);
+function updateBoxes(){
 
-      return WORDS.filter((w) => {
-        if (w.length !== n) return false;
+const pattern=document.getElementById("pattern").value;
+const boxes=document.getElementById("boxes");
 
-        // pattern
-        for (let i = 0; i < n; i++) {
-          const c = pat[i];
-          if (c !== "_" && w[i] !== c) return false;
-        }
+boxes.innerHTML="";
 
-        // exclude
-        for (const c of no) if (w.includes(c)) return false;
+for(let i=0;i<5;i++){
 
-        // include
-        for (const c of must) if (!w.includes(c)) return false;
+const div=document.createElement("div");
+div.className="box";
+div.textContent=pattern[i]||"";
+boxes.appendChild(div);
 
-        return true;
-      }).sort();
-    }
+}
 
-    function renderResults(words) {
-      $("count").textContent = `${words.length} viable words`;
-      const grid = $("results");
-      grid.innerHTML = "";
-      for (const w of words) {
-        const d = document.createElement("div");
-        d.className = "word-tile";
-        d.textContent = w.toUpperCase();
-        grid.appendChild(d);
-      }
-    }
+}
 
-    function saveState() {
-      localStorage.setItem("lps_state", JSON.stringify({
-        len: $("len").value,
-        pattern: $("pattern").value,
-        include: $("include").value,
-        exclude: $("exclude").value
-      }));
-    }
+document.getElementById("pattern").addEventListener("input",updateBoxes);
 
-    function loadState() {
-      try {
-        const s = JSON.parse(localStorage.getItem("lps_state") || "{}");
-        if (s.len) $("len").value = s.len;
-        if (s.pattern) $("pattern").value = s.pattern;
-        if (s.include) $("include").value = s.include;
-        if (s.exclude) $("exclude").value = s.exclude;
-      } catch {}
-    }
+updateBoxes();
 
-    function solve() {
-      const n = parseInt($("len").value, 10);
-      const pat = normalizePattern($("pattern").value, n);
-      renderBoxes(pat);
+function search(){
 
-      const words = filterWords({
-        pattern: pat,
-        include: $("include").value,
-        exclude: $("exclude").value,
-        n
-      });
+const pattern=document.getElementById("pattern").value.toLowerCase();
+const include=document.getElementById("include").value.toLowerCase();
+const exclude=document.getElementById("exclude").value.toLowerCase();
 
-      renderResults(words);
-      saveState();
-    }
+const results=WORDS.filter(word=>{
 
-    function resetAll() {
-      $("pattern").value = "";
-      $("include").value = "";
-      $("exclude").value = "";
-      localStorage.removeItem("lps_state");
-      solve();
-    }
+if(pattern){
 
-    // init
-    document.addEventListener("DOMContentLoaded", () => {
-      loadState();
-      solve();
+for(let i=0;i<pattern.length;i++){
+if(pattern[i]!="_" && pattern[i]!=word[i]) return false;
+}
 
-      $("searchBtn").addEventListener("click", solve);
-      $("reset").addEventListener("click", resetAll);
+}
 
-      ["pattern","include","exclude","len"].forEach(id => {
-        $(id).addEventListener("input", solve);
-        $(id).addEventListener("change", solve);
-      });
-    });
-  </script>
+for(const c of include){
+if(!word.includes(c)) return false;
+}
+
+for(const c of exclude){
+if(word.includes(c)) return false;
+}
+
+return true;
+
+});
+
+renderResults(results);
+
+}
+
+function renderResults(words){
+
+document.getElementById("count").textContent=
+words.length+" viable words";
+
+const container=document.getElementById("results");
+
+container.innerHTML="";
+
+words.forEach(w=>{
+
+const div=document.createElement("div");
+div.className="word";
+div.textContent=w.toUpperCase();
+container.appendChild(div);
+
+});
+
+}
+
+function reset(){
+
+document.getElementById("pattern").value="";
+document.getElementById("include").value="";
+document.getElementById("exclude").value="";
+document.getElementById("results").innerHTML="";
+document.getElementById("count").textContent="";
+updateBoxes();
+
+}
+
+</script>
+
 </body>
 </html>
