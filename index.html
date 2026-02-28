@@ -46,7 +46,12 @@ h1{
   color:#0f3d48;
 }
 
-.row-center{ display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
+.row-center{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
 
 select{
   padding:10px 14px;
@@ -74,21 +79,29 @@ select{
   justify-content:center;
   gap:8px;
   margin:18px 0 18px;
-  flex-wrap:nowrap; /* always 1 row */
+  flex-wrap:nowrap;
 }
 
+/* Each box is now a real input */
 .box{
   width: clamp(44px, calc((100vw - 18px*2 - 22px*2 - 8px*4) / 5), 72px);
   height: clamp(44px, calc((100vw - 18px*2 - 22px*2 - 8px*4) / 5), 72px);
   border:2px solid var(--border);
   border-radius:14px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  background:white;
+  text-align:center;
   font-size: clamp(18px, 5vw, 30px);
   font-weight:650;
-  background:white;
   color:#163d45;
+  outline:none;
+  padding:0;
+  line-height:1;
+  text-transform: uppercase;
+  -webkit-appearance:none;
+}
+.box:focus{
+  border-color: rgba(15,76,92,.55);
+  box-shadow: 0 0 0 4px rgba(15,76,92,.12);
 }
 
 label{
@@ -100,7 +113,10 @@ label{
   letter-spacing:0.4px;
 }
 
-input{
+/* Hide the pattern text input as requested */
+#patternRow{ display:none; }
+
+input.text{
   width:100%;
   padding:12px 12px;
   border-radius:12px;
@@ -121,7 +137,6 @@ button{
   font-weight:700;
   box-shadow:0 14px 30px rgba(15,76,92,0.22);
 }
-
 button:active{ transform: translateY(1px); }
 
 .meta{
@@ -132,7 +147,6 @@ button:active{ transform: translateY(1px); }
   color:var(--muted);
   font-size:14px;
 }
-
 .meta a{ color:var(--muted); text-decoration:underline; cursor:pointer; }
 
 .words{
@@ -191,16 +205,20 @@ button:active{ transform: translateY(1px); }
       </label>
     </div>
 
-    <div class="boxes" id="boxes"></div>
+    <!-- Tappable boxes -->
+    <div class="boxes" id="boxes" aria-label="Pattern boxes"></div>
 
-    <label>PATTERN (_ = unknown)</label>
-    <input id="pattern" placeholder="_____" maxlength="5" autocapitalize="none" spellcheck="false" />
+    <!-- Hidden pattern input (kept for internal syncing) -->
+    <div id="patternRow">
+      <label>PATTERN (_ = unknown)</label>
+      <input id="pattern" class="text" placeholder="_____" maxlength="5" autocapitalize="none" spellcheck="false" />
+    </div>
 
     <label>INCLUDE LETTERS (yellow)</label>
-    <input id="include" autocapitalize="none" spellcheck="false" />
+    <input id="include" class="text" autocapitalize="none" spellcheck="false" />
 
     <label>EXCLUDE LETTERS (gray)</label>
-    <input id="exclude" autocapitalize="none" spellcheck="false" />
+    <input id="exclude" class="text" autocapitalize="none" spellcheck="false" />
 
     <button id="searchBtn">Search</button>
 
@@ -225,23 +243,6 @@ let READY = false;
 
 function normalizeLetters(s){ return (s || "").toLowerCase().replace(/[^a-z]/g, ""); }
 
-function normalizePattern(p){
-  const s = (p || "").toLowerCase().replace(/[^a-z_]/g, "");
-  return (s.length ? s.padEnd(5, "_").slice(0,5) : "_____");
-}
-
-function renderBoxes(pattern){
-  const boxes = $("boxes");
-  boxes.innerHTML = "";
-  for(let i=0;i<5;i++){
-    const div = document.createElement("div");
-    div.className = "box";
-    const c = pattern[i];
-    div.textContent = (c && c !== "_") ? c.toUpperCase() : "";
-    boxes.appendChild(div);
-  }
-}
-
 function parseWordFile(text){
   return text
     .split(/\r?\n/)
@@ -256,8 +257,8 @@ async function loadLists(){
       fetch("/data/allowed.txt", { cache: "no-store" })
     ]);
 
-    if(!a.ok) throw new Error("answers.txt not found (did you commit data/answers.txt?)");
-    if(!g.ok) throw new Error("allowed.txt not found (did you commit data/allowed.txt?)");
+    if(!a.ok) throw new Error("answers.txt not found (commit data/answers.txt)");
+    if(!g.ok) throw new Error("allowed.txt not found (commit data/allowed.txt)");
 
     const answersText = await a.text();
     const allowedText = await g.text();
@@ -268,14 +269,17 @@ async function loadLists(){
     READY = true;
     $("status").textContent = `Loaded ${ANSWERS.length.toLocaleString()} answers + ${ALLOWED.length.toLocaleString()} allowed guesses.`;
 
-    // restore prior state
+    // restore state
     try{
       const s = JSON.parse(localStorage.getItem("lps_state") || "{}");
       if (typeof s.useAll === "boolean") $("useAll").checked = s.useAll;
-      if (s.pattern) $("pattern").value = s.pattern;
       if (s.include) $("include").value = s.include;
       if (s.exclude) $("exclude").value = s.exclude;
-    }catch{}
+      if (s.pat && typeof s.pat === "string") setBoxesFromPattern(s.pat);
+      else setBoxesFromPattern("_____");
+    }catch{
+      setBoxesFromPattern("_____");
+    }
 
     solve();
   }catch(err){
@@ -292,8 +296,70 @@ function getActiveList(){
   return Array.from(set);
 }
 
+function patternFromBoxes(){
+  const inputs = Array.from($("boxes").querySelectorAll("input.box"));
+  const pat = inputs.map(x => {
+    const v = (x.value || "").toLowerCase();
+    return v && /^[a-z]$/.test(v) ? v : "_";
+  }).join("");
+  $("pattern").value = pat; // keep hidden input in sync
+  return pat;
+}
+
+function setBoxesFromPattern(patRaw){
+  const pat = (patRaw || "").toLowerCase().replace(/[^a-z_]/g, "").padEnd(5,"_").slice(0,5);
+  const boxes = $("boxes");
+  boxes.innerHTML = "";
+
+  for (let i = 0; i < 5; i++) {
+    const inp = document.createElement("input");
+    inp.className = "box";
+    inp.type = "text";
+    inp.inputMode = "text";
+    inp.autocomplete = "off";
+    inp.autocapitalize = "characters";
+    inp.spellcheck = false;
+    inp.maxLength = 1;
+    inp.dataset.idx = String(i);
+
+    const c = pat[i];
+    inp.value = (c && c !== "_") ? c.toUpperCase() : "";
+
+    inp.addEventListener("input", (e) => {
+      let v = (e.target.value || "").replace(/[^a-zA-Z]/g, "").slice(0,1);
+      e.target.value = v.toUpperCase();
+
+      patternFromBoxes();
+
+      // auto-advance
+      if (v && i < 4) {
+        const next = boxes.querySelector(`input.box[data-idx="${i+1}"]`);
+        next?.focus();
+      }
+
+      // auto-solve
+      solve();
+    });
+
+    inp.addEventListener("keydown", (e) => {
+      if (e.key === "Backspace" && !inp.value && i > 0) {
+        const prev = boxes.querySelector(`input.box[data-idx="${i-1}"]`);
+        prev?.focus();
+      }
+    });
+
+    inp.addEventListener("focus", () => {
+      setTimeout(() => inp.select(), 0);
+    });
+
+    boxes.appendChild(inp);
+  }
+
+  $("pattern").value = pat;
+}
+
 function filterWords({ pattern, include, exclude }){
-  const pat = normalizePattern(pattern);
+  const pat = (pattern || "_____").toLowerCase();
   const inc = new Set(normalizeLetters(include).split(""));
   const exc = new Set(normalizeLetters(exclude).split(""));
 
@@ -330,26 +396,26 @@ function renderResults(words){
           if (READY) $("status").textContent = `Loaded ${ANSWERS.length.toLocaleString()} answers + ${ALLOWED.length.toLocaleString()} allowed guesses.`;
         }, 1200);
       }catch{
-        // clipboard may fail on some iOS contexts; ignore
+        // clipboard can fail in some iOS contexts; ignore
       }
     });
     container.appendChild(div);
   }
 }
 
-function saveState(){
+function saveState(pat){
   localStorage.setItem("lps_state", JSON.stringify({
     useAll: $("useAll").checked,
-    pattern: $("pattern").value,
     include: $("include").value,
-    exclude: $("exclude").value
+    exclude: $("exclude").value,
+    pat: pat
   }));
 }
 
 function solve(){
   if(!READY) return;
-  const pat = normalizePattern($("pattern").value);
-  renderBoxes(pat);
+
+  const pat = patternFromBoxes();
 
   const words = filterWords({
     pattern: pat,
@@ -358,27 +424,28 @@ function solve(){
   });
 
   renderResults(words);
-  saveState();
+  saveState(pat);
 }
 
 function resetAll(){
-  $("pattern").value = "";
   $("include").value = "";
   $("exclude").value = "";
   $("useAll").checked = false;
   localStorage.removeItem("lps_state");
-  renderBoxes("_____");
+
+  setBoxesFromPattern("_____");
   $("results").innerHTML = "";
   $("count").textContent = "0 viable words";
+  if (READY) $("status").textContent = `Loaded ${ANSWERS.length.toLocaleString()} answers + ${ALLOWED.length.toLocaleString()} allowed guesses.`;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  renderBoxes("_____");
+  setBoxesFromPattern("_____");
 
   $("searchBtn").addEventListener("click", solve);
   $("resetLink").addEventListener("click", resetAll);
 
-  ["pattern","include","exclude","useAll"].forEach(id => {
+  ["include","exclude","useAll"].forEach(id => {
     $(id).addEventListener("input", solve);
     $(id).addEventListener("change", solve);
   });
