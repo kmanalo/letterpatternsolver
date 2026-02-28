@@ -1,77 +1,388 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Letter Pattern Solver</title>
-<style>
-body { font-family: system-ui; padding: 20px; max-width: 600px; margin: auto; }
-input, button { font-size: 18px; padding: 10px; margin: 5px 0; width: 100%; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
-.word { border: 1px solid #ccc; padding: 8px; text-align: center; font-family: monospace; }
-</style>
-</head>
-<body>
-
-<h2>Letter Pattern Solver</h2>
-
-<input id="pattern" placeholder="_A__E">
-<input id="include" placeholder="include letters">
-<input id="exclude" placeholder="exclude letters">
-
-<button onclick="solve()">Solve</button>
-
-<div id="count"></div>
-<div id="results" class="grid"></div>
-
-<script>
-
-const words = [
-"cigar","rebut","sissy","humph","awake","blush","focal","evade",
-"naval","serve","heath","dwarf","model","karma","stink",
-"grade","quiet","bench","abate","feign"
-];
-
-function solve() {
-
-  const pattern = document.getElementById("pattern").value.toLowerCase();
-  const include = document.getElementById("include").value.toLowerCase();
-  const exclude = document.getElementById("exclude").value.toLowerCase();
-
-  const results = words.filter(word => {
-
-    for (let i=0;i<pattern.length;i++) {
-      if (pattern[i] && pattern[i] != "_" && word[i] != pattern[i])
-        return false;
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Letter Pattern Solver</title>
+  <style>
+    :root{
+      --bg:#f4f6f8;
+      --card:#ffffff;
+      --ink:#0f2d3a;
+      --muted:#6b7b85;
+      --border:#dfe5ea;
+      --shadow: 0 10px 30px rgba(15,45,58,.12);
+      --radius:18px;
+      --btn:#0f4a5c;
+      --btn2:#0c3b4a;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
     }
 
-    for (let c of include)
-      if (!word.includes(c))
-        return false;
+    html,body{height:100%;}
+    body{
+      margin:0;
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--ink);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+    }
 
-    for (let c of exclude)
-      if (word.includes(c))
-        return false;
+    .wrap{
+      width:min(860px, 100%);
+    }
 
-    return true;
+    .card{
+      background: var(--card);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
 
-  });
+    .title{
+      text-align:center;
+      font-size: 34px;
+      line-height:1.1;
+      letter-spacing:.2px;
+      margin: 4px 0 18px;
+      font-weight: 750;
+      color: var(--ink);
+    }
 
-  document.getElementById("count").innerText =
-    results.length + " viable words";
+    .subrow{
+      display:flex;
+      justify-content:center;
+      margin-bottom: 18px;
+    }
 
-  const div = document.getElementById("results");
-  div.innerHTML = "";
+    select{
+      appearance:none;
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding: 14px 46px 14px 16px;
+      font-size: 22px;
+      font-weight:700;
+      color: var(--ink);
+      box-shadow: 0 4px 14px rgba(15,45,58,.08);
+      position:relative;
+      outline:none;
+    }
 
-  results.forEach(w => {
-    const d = document.createElement("div");
-    d.className = "word";
-    d.innerText = w;
-    div.appendChild(d);
-  });
+    .selectWrap{
+      position:relative;
+      display:inline-block;
+    }
+    .selectWrap:after{
+      content:"▾";
+      position:absolute;
+      right:14px;
+      top:50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 18px;
+      pointer-events:none;
+    }
 
-}
+    .boxes{
+      display:flex;
+      justify-content:center;
+      gap: 12px;
+      margin: 8px 0 18px;
+      flex-wrap:wrap;
+    }
 
-</script>
+    .box{
+      width:72px;
+      height:72px;
+      border-radius:12px;
+      border:2px solid var(--border);
+      background:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-family: var(--mono);
+      font-size: 30px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      user-select:none;
+    }
 
+    .controls{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin: 0 auto 14px;
+      width: min(560px, 100%);
+    }
+
+    .field{
+      display:grid;
+      gap:6px;
+    }
+    .label{
+      font-size: 12px;
+      color: var(--muted);
+      font-weight:600;
+      letter-spacing:.2px;
+      text-transform: uppercase;
+    }
+
+    input{
+      border:1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 16px;
+      outline:none;
+    }
+
+    .btnRow{
+      display:flex;
+      justify-content:center;
+      margin-top: 6px;
+    }
+
+    button{
+      width:min(560px, 100%);
+      border:none;
+      border-radius: 16px;
+      padding: 16px 18px;
+      font-size: 18px;
+      font-weight: 750;
+      color:#fff;
+      background: linear-gradient(180deg, var(--btn), var(--btn2));
+      box-shadow: 0 14px 30px rgba(15,74,92,.25);
+      cursor:pointer;
+    }
+    button:active{ transform: translateY(1px); }
+
+    .meta{
+      width:min(560px, 100%);
+      margin: 16px auto 10px;
+      color: var(--muted);
+      font-size: 14px;
+      display:flex;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap:wrap;
+    }
+
+    .results-grid{
+      width:min(760px, 100%);
+      margin: 0 auto;
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+      gap: 10px;
+    }
+
+    .word-tile{
+      border:1px solid var(--border);
+      border-radius: 12px;
+      background:#fff;
+      padding: 10px 10px;
+      text-align:center;
+      font-family: var(--mono);
+      letter-spacing: 2px;
+      font-size: 14px;
+    }
+
+    .footer{
+      text-align:center;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* Mobile tweaks */
+    @media (max-width: 430px){
+      .title{ font-size: 26px; }
+      .box{ width:58px; height:58px; font-size:26px; }
+      select{ font-size:18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="title">Fill-in-the-Blanks Search</div>
+
+      <div class="subrow">
+        <div class="selectWrap">
+          <select id="len">
+            <option value="5" selected>5 Letters</option>
+            <option value="4">4 Letters</option>
+            <option value="6">6 Letters</option>
+            <option value="7">7 Letters</option>
+            <option value="8">8 Letters</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="boxes" id="boxes"></div>
+
+      <div class="controls">
+        <div class="field">
+          <div class="label">Pattern (use _ for unknown)</div>
+          <input id="pattern" placeholder="_____" maxlength="8" autocapitalize="none" spellcheck="false" />
+        </div>
+
+        <div class="field">
+          <div class="label">Include letters (yellow)</div>
+          <input id="include" placeholder="rt" autocapitalize="none" spellcheck="false" />
+        </div>
+
+        <div class="field">
+          <div class="label">Exclude letters (gray)</div>
+          <input id="exclude" placeholder="snl" autocapitalize="none" spellcheck="false" />
+        </div>
+      </div>
+
+      <div class="btnRow">
+        <button id="searchBtn">Search</button>
+      </div>
+
+      <div class="meta">
+        <div id="count">0 viable words</div>
+        <div><a id="reset" href="javascript:void(0)" style="color:inherit;">Reset</a></div>
+      </div>
+
+      <div id="results" class="results-grid"></div>
+
+      <div class="footer">
+        Not affiliated with Wordle or The New York Times.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Starter list (replace later with full Wordle lists)
+    const WORDS = [
+      "cigar","rebut","sissy","humph","awake","blush","focal","evade","naval","serve",
+      "heath","dwarf","model","karma","stink","grade","quiet","bench","abate","feign",
+      "major","death","fresh","crust","stool","colon","abase","marry","react","batty"
+    ];
+
+    const $ = (id) => document.getElementById(id);
+
+    function normalizeLetters(s) {
+      return (s || "").toLowerCase().replace(/[^a-z]/g, "");
+    }
+
+    function normalizePattern(p, n) {
+      const s = (p || "").toLowerCase().replace(/[^a-z_]/g, "");
+      const filled = s.length ? s.padEnd(n, "_").slice(0, n) : "_".repeat(n);
+      return filled;
+    }
+
+    function renderBoxes(pattern) {
+      const host = $("boxes");
+      host.innerHTML = "";
+      for (let i = 0; i < pattern.length; i++) {
+        const d = document.createElement("div");
+        d.className = "box";
+        d.textContent = (pattern[i] === "_") ? "" : pattern[i].toUpperCase();
+        host.appendChild(d);
+      }
+    }
+
+    function filterWords({ pattern, include, exclude, n }) {
+      const must = new Set(normalizeLetters(include).split(""));
+      const no = new Set(normalizeLetters(exclude).split(""));
+      const pat = normalizePattern(pattern, n);
+
+      return WORDS.filter((w) => {
+        if (w.length !== n) return false;
+
+        // pattern
+        for (let i = 0; i < n; i++) {
+          const c = pat[i];
+          if (c !== "_" && w[i] !== c) return false;
+        }
+
+        // exclude
+        for (const c of no) if (w.includes(c)) return false;
+
+        // include
+        for (const c of must) if (!w.includes(c)) return false;
+
+        return true;
+      }).sort();
+    }
+
+    function renderResults(words) {
+      $("count").textContent = `${words.length} viable words`;
+      const grid = $("results");
+      grid.innerHTML = "";
+      for (const w of words) {
+        const d = document.createElement("div");
+        d.className = "word-tile";
+        d.textContent = w.toUpperCase();
+        grid.appendChild(d);
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem("lps_state", JSON.stringify({
+        len: $("len").value,
+        pattern: $("pattern").value,
+        include: $("include").value,
+        exclude: $("exclude").value
+      }));
+    }
+
+    function loadState() {
+      try {
+        const s = JSON.parse(localStorage.getItem("lps_state") || "{}");
+        if (s.len) $("len").value = s.len;
+        if (s.pattern) $("pattern").value = s.pattern;
+        if (s.include) $("include").value = s.include;
+        if (s.exclude) $("exclude").value = s.exclude;
+      } catch {}
+    }
+
+    function solve() {
+      const n = parseInt($("len").value, 10);
+      const pat = normalizePattern($("pattern").value, n);
+      renderBoxes(pat);
+
+      const words = filterWords({
+        pattern: pat,
+        include: $("include").value,
+        exclude: $("exclude").value,
+        n
+      });
+
+      renderResults(words);
+      saveState();
+    }
+
+    function resetAll() {
+      $("pattern").value = "";
+      $("include").value = "";
+      $("exclude").value = "";
+      localStorage.removeItem("lps_state");
+      solve();
+    }
+
+    // init
+    document.addEventListener("DOMContentLoaded", () => {
+      loadState();
+      solve();
+
+      $("searchBtn").addEventListener("click", solve);
+      $("reset").addEventListener("click", resetAll);
+
+      ["pattern","include","exclude","len"].forEach(id => {
+        $(id).addEventListener("input", solve);
+        $(id).addEventListener("change", solve);
+      });
+    });
+  </script>
 </body>
 </html>
