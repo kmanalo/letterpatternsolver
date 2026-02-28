@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Letter Pattern Solver</title>
+<style>
+body { font-family: system-ui; padding: 20px; max-width: 600px; margin: auto; }
+input, button { font-size: 18px; padding: 10px; margin: 5px 0; width: 100%; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
+.word { border: 1px solid #ccc; padding: 8px; text-align: center; font-family: monospace; }
+</style>
+</head>
+<body>
+
+<h2>Letter Pattern Solver</h2>
+
+<input id="pattern" placeholder="_A__E">
+<input id="include" placeholder="include letters">
+<input id="exclude" placeholder="exclude letters">
+
+<button onclick="solve()">Solve</button>
+
+<div id="count"></div>
+<div id="results" class="grid"></div>
+
+<script>
+
+const words = [
+"cigar","rebut","sissy","humph","awake","blush","focal","evade",
+"naval","serve","heath","dwarf","model","karma","stink",
+"grade","quiet","bench","abate","feign"
+];
+
+function solve() {
+
+  const pattern = document.getElementById("pattern").value.toLowerCase();
+  const include = document.getElementById("include").value.toLowerCase();
+  const exclude = document.getElementById("exclude").value.toLowerCase();
+
+  const results = words.filter(word => {
+
+    for (let i=0;i<pattern.length;i++) {
+      if (pattern[i] && pattern[i] != "_" && word[i] != pattern[i])
+        return false;
+    }
+
+    for (let c of include)
+      if (!word.includes(c))
+        return false;
+
+    for (let c of exclude)
+      if (word.includes(c))
+        return false;
+
+    return true;
+
+  });
+
+  document.getElementById("count").innerText =
+    results.length + " viable words";
+
+  const div = document.getElementById("results");
+  div.innerHTML = "";
+
+  results.forEach(w => {
+    const d = document.createElement("div");
+    d.className = "word";
+    d.innerText = w;
+    div.appendChild(d);
+  });
+
+}
+
+</script>
+
+</body>
+</html>
