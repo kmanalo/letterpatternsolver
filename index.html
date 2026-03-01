@@ -16,7 +16,6 @@
 <link rel="canonical" href="https://letterpatternsolver.com/">
 
 <style>
-
 :root{
   --bg:#f4f7f8;
   --card:#ffffff;
@@ -27,16 +26,19 @@
   --shadow:0 10px 30px rgba(0,0,0,0.08);
 }
 
+*{ box-sizing:border-box; }
+
 body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
   background:var(--bg);
   padding:18px;
+  color:var(--ink);
 }
 
 .container{
   max-width:560px;
-  margin:auto;
+  margin:0 auto;
 }
 
 .card{
@@ -45,6 +47,7 @@ body{
   padding:20px;
   box-shadow:var(--shadow);
   max-width:100%;
+  overflow:hidden; /* hard guard against any accidental overflow */
 }
 
 h1{
@@ -56,40 +59,45 @@ h1{
 .subtitle{
   text-align:center;
   color:var(--muted);
-  margin-bottom:10px;
+  margin:6px 0 12px;
 }
 
 .badge{
   text-align:center;
   border:2px solid var(--border);
-  padding:6px;
+  padding:6px 10px;
   border-radius:10px;
-  margin:auto;
-  width:160px;
-}
-
-.boxes{
-  display:flex;
-  justify-content:center;
-  gap:8px;
-  margin:16px 0;
+  margin:0 auto 14px;
+  width:max-content;
   max-width:100%;
 }
 
+/* FIX: grid guarantees 5 boxes never exceed card width */
+.boxes{
+  display:grid;
+  grid-template-columns:repeat(5, minmax(0, 1fr));
+  gap:8px;
+  margin:0 auto 16px;
+  width:100%;
+  max-width:420px;
+}
+
 .box{
-  width: clamp(44px, calc((100vw - 36px - 40px - 32px) / 5), 64px);
-  height: clamp(44px, calc((100vw - 36px - 40px - 32px) / 5), 64px);
+  width:100%;
+  aspect-ratio:1 / 1;
   border:2px solid var(--border);
   border-radius:12px;
-  font-size: clamp(18px, 5vw, 28px);
+  font-size:22px;
   text-align:center;
-  font-weight:bold;
+  font-weight:700;
   text-transform:uppercase;
+  padding:0;
 }
 
 label{
   display:block;
   margin-top:10px;
+  font-size:16px;
 }
 
 input.text{
@@ -98,6 +106,7 @@ input.text{
   border-radius:10px;
   border:2px solid var(--border);
   margin-top:6px;
+  font-size:16px; /* prevents iOS zoom */
 }
 
 .actions{
@@ -111,7 +120,8 @@ button{
   padding:12px;
   border-radius:12px;
   border:none;
-  font-weight:bold;
+  font-weight:700;
+  font-size:16px;
 }
 
 .primary{
@@ -126,7 +136,7 @@ button{
 
 .words{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(3, 1fr);
   gap:8px;
   margin-top:14px;
 }
@@ -142,174 +152,154 @@ button{
   text-align:center;
   margin-top:10px;
   color:var(--muted);
+  font-size:18px;
 }
 
 .footer{
   text-align:center;
   margin-top:20px;
+  font-size:16px;
 }
-
 </style>
 
 </head>
-
 <body>
 
 <div class="container">
-<div class="card">
+  <div class="card">
 
-<h1>5-Letter Word Solver</h1>
-<div class="subtitle">Find Wordle candidates instantly</div>
+    <h1>5-Letter Word Solver</h1>
+    <div class="subtitle">Find Wordle candidates instantly</div>
 
-<div class="badge">Wordle (5 letters)</div>
+    <div class="badge">Wordle (5 letters)</div>
 
-<div class="boxes" id="boxes"></div>
+    <div class="boxes" id="boxes"></div>
 
-<label>Include letters</label>
-<input id="include" class="text" oninput="solve()">
+    <label>Include letters</label>
+    <input id="include" class="text" oninput="solve()">
 
-<label>Exclude letters</label>
-<input id="exclude" class="text" oninput="solve()">
+    <label>Exclude letters</label>
+    <input id="exclude" class="text" oninput="solve()">
 
-<div class="actions">
-<button class="primary" onclick="dismiss()">Done</button>
-<button class="secondary" onclick="resetAll()">Reset</button>
-</div>
+    <div class="actions">
+      <button class="primary" onclick="dismiss()">Done</button>
+      <button class="secondary" onclick="resetAll()">Reset</button>
+    </div>
 
-<div id="count" class="status">Enter letters to search</div>
+    <div id="count" class="status">Enter letters to search</div>
 
-<div id="results" class="words"></div>
+    <div id="results" class="words"></div>
 
-<div id="status" class="status">Loading word list…</div>
+    <div id="status" class="status">Loading word list…</div>
 
-<div class="footer">
-<a href="/privacy.html">Privacy</a> |
-<a href="/about.html">About</a> |
-<a href="/contact.html">Contact</a>
-</div>
+    <div class="footer">
+      <a href="/privacy.html">Privacy</a> |
+      <a href="/about.html">About</a> |
+      <a href="/contact.html">Contact</a>
+    </div>
 
-</div>
+  </div>
 </div>
 
 <script>
-
 let answers=[]
 let allowed=[]
 let ready=false
 
 function parse(text){
-return text.split("\n").map(x=>x.trim()).filter(x=>x.length==5)
+  return text.split("\n").map(x=>x.trim()).filter(x=>x.length==5)
 }
 
 async function load(){
+  answers=parse(await (await fetch("/data/answers.txt")).text())
+  allowed=parse(await (await fetch("/data/allowed.txt")).text())
 
-answers=parse(await (await fetch("/data/answers.txt")).text())
-allowed=parse(await (await fetch("/data/allowed.txt")).text())
-
-ready=true
-document.getElementById("status").innerText="Ready"
-
-renderBoxes()
-
+  ready=true
+  document.getElementById("status").innerText="Ready"
+  renderBoxes()
 }
 
 function renderBoxes(){
+  let container=document.getElementById("boxes")
+  container.innerHTML=""
 
-let container=document.getElementById("boxes")
-container.innerHTML=""
-
-for(let i=0;i<5;i++){
-
-let box=document.createElement("input")
-box.className="box"
-box.maxLength=1
-
-box.oninput=solve
-
-container.appendChild(box)
-
-}
-
+  for(let i=0;i<5;i++){
+    let box=document.createElement("input")
+    box.className="box"
+    box.maxLength=1
+    box.autocomplete="off"
+    box.autocapitalize="characters"
+    box.inputMode="text"
+    box.addEventListener("input", ()=>{
+      // force single uppercase letter
+      box.value = (box.value || "").replace(/[^a-zA-Z]/g,"").slice(0,1).toUpperCase()
+      solve()
+    })
+    container.appendChild(box)
+  }
 }
 
 function getPattern(){
-
-return [...document.querySelectorAll(".box")]
-.map(x=>x.value||"_")
-.join("")
-.toLowerCase()
-
+  return [...document.querySelectorAll(".box")]
+    .map(x=> (x.value ? x.value : "_"))
+    .join("")
+    .toLowerCase()
 }
 
 function solve(){
+  if(!ready)return
 
-if(!ready)return
+  let pattern=getPattern()
+  let include=(document.getElementById("include").value||"").toLowerCase().replace(/[^a-z]/g,"")
+  let exclude=(document.getElementById("exclude").value||"").toLowerCase().replace(/[^a-z]/g,"")
 
-let pattern=getPattern()
-let include=document.getElementById("include").value.toLowerCase()
-let exclude=document.getElementById("exclude").value.toLowerCase()
+  if(pattern==="_____" && !include && !exclude){
+    document.getElementById("results").innerHTML=""
+    document.getElementById("count").innerText="Enter letters to search"
+    return
+  }
 
-if(pattern==="_____" && !include && !exclude){
+  let list=[...new Set([...answers,...allowed])]
 
-document.getElementById("results").innerHTML=""
-document.getElementById("count").innerText="Enter letters to search"
+  let filtered=list.filter(word=>{
+    for(let i=0;i<5;i++){
+      if(pattern[i]!=="_" && word[i]!==pattern[i]) return false
+    }
+    for(let c of include){
+      if(!word.includes(c)) return false
+    }
+    for(let c of exclude){
+      if(word.includes(c)) return false
+    }
+    return true
+  })
 
-return
+  document.getElementById("count").innerText=filtered.length+" viable words"
 
-}
+  let out=document.getElementById("results")
+  out.innerHTML=""
 
-let list=[...new Set([...answers,...allowed])]
-
-let filtered=list.filter(word=>{
-
-for(let i=0;i<5;i++)
-if(pattern[i]!=="_" && word[i]!==pattern[i])return false
-
-for(let c of include)
-if(!word.includes(c))return false
-
-for(let c of exclude)
-if(word.includes(c))return false
-
-return true
-
-})
-
-document.getElementById("count").innerText=filtered.length+" viable words"
-
-let container=document.getElementById("results")
-container.innerHTML=""
-
-filtered.forEach(word=>{
-
-let div=document.createElement("div")
-div.className="word"
-div.innerText=word
-
-container.appendChild(div)
-
-})
-
+  filtered.forEach(word=>{
+    let div=document.createElement("div")
+    div.className="word"
+    div.innerText=word.toUpperCase()
+    out.appendChild(div)
+  })
 }
 
 function resetAll(){
-
-renderBoxes()
-
-document.getElementById("include").value=""
-document.getElementById("exclude").value=""
-
-document.getElementById("results").innerHTML=""
-document.getElementById("count").innerText="Enter letters to search"
-
+  renderBoxes()
+  document.getElementById("include").value=""
+  document.getElementById("exclude").value=""
+  document.getElementById("results").innerHTML=""
+  document.getElementById("count").innerText="Enter letters to search"
 }
 
 function dismiss(){
-document.activeElement.blur()
+  if(document.activeElement) document.activeElement.blur()
 }
 
 load()
-
 </script>
 
 </body>
