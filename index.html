@@ -412,8 +412,8 @@ function applyParamsFromUrl(){
 
 async function load(){
   try{
-    const a = await fetch("/data/answers.txt", { cache:"no-store" });
-    const b = await fetch("/data/allowed.txt", { cache:"no-store" });
+    const a = await fetch("/data/answers.txt");
+    const b = await fetch("/data/allowed.txt");
 
     answers = parse(await a.text());
     allowed = parse(await b.text());
