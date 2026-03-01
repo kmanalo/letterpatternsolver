@@ -44,11 +44,13 @@ body{
   border-radius:20px;
   padding:20px;
   box-shadow:var(--shadow);
+  max-width:100%;
 }
 
 h1{
   text-align:center;
   margin:0;
+  font-size:32px;
 }
 
 .subtitle{
@@ -63,7 +65,7 @@ h1{
   padding:6px;
   border-radius:10px;
   margin:auto;
-  width:140px;
+  width:160px;
 }
 
 .boxes{
@@ -71,15 +73,23 @@ h1{
   justify-content:center;
   gap:8px;
   margin:16px 0;
+  max-width:100%;
 }
 
 .box{
-  width:56px;
-  height:56px;
+  width: clamp(44px, calc((100vw - 36px - 40px - 32px) / 5), 64px);
+  height: clamp(44px, calc((100vw - 36px - 40px - 32px) / 5), 64px);
   border:2px solid var(--border);
   border-radius:12px;
-  font-size:28px;
+  font-size: clamp(18px, 5vw, 28px);
   text-align:center;
+  font-weight:bold;
+  text-transform:uppercase;
+}
+
+label{
+  display:block;
+  margin-top:10px;
 }
 
 input.text{
@@ -140,6 +150,7 @@ button{
 }
 
 </style>
+
 </head>
 
 <body>
@@ -155,10 +166,10 @@ button{
 <div class="boxes" id="boxes"></div>
 
 <label>Include letters</label>
-<input id="include" class="text">
+<input id="include" class="text" oninput="solve()">
 
 <label>Exclude letters</label>
-<input id="exclude" class="text">
+<input id="exclude" class="text" oninput="solve()">
 
 <div class="actions">
 <button class="primary" onclick="dismiss()">Done</button>
@@ -196,7 +207,6 @@ answers=parse(await (await fetch("/data/answers.txt")).text())
 allowed=parse(await (await fetch("/data/allowed.txt")).text())
 
 ready=true
-
 document.getElementById("status").innerText="Ready"
 
 renderBoxes()
@@ -211,7 +221,6 @@ container.innerHTML=""
 for(let i=0;i<5;i++){
 
 let box=document.createElement("input")
-
 box.className="box"
 box.maxLength=1
 
@@ -253,23 +262,14 @@ let list=[...new Set([...answers,...allowed])]
 
 let filtered=list.filter(word=>{
 
-for(let i=0;i<5;i++){
-
+for(let i=0;i<5;i++)
 if(pattern[i]!=="_" && word[i]!==pattern[i])return false
 
-}
-
-for(let c of include){
-
+for(let c of include)
 if(!word.includes(c))return false
 
-}
-
-for(let c of exclude){
-
+for(let c of exclude)
 if(word.includes(c))return false
-
-}
 
 return true
 
