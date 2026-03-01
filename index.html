@@ -1,442 +1,562 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<!-- AdSense -->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-685209934064589"
-crossorigin="anonymous"></script>
+  <title>Letter Pattern Solver | Find Words That Match a Pattern</title>
+  <meta name="description" content="Find English words that match a letter pattern. Use underscores (_) for unknown letters. Great for crosswords and word games." />
+  <link rel="canonical" href="https://letterpatternsolver.com/" />
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Optional: if you have a favicon -->
+  <!-- <link rel="icon" href="/favicon.ico" /> -->
 
-<title>5-Letter Word Solver | LetterPatternSolver</title>
+  <!-- AdSense (replace ca-pub-XXXXXXXXXXXXXXX with your Publisher ID) -->
+  <!-- IMPORTANT: Do not request review until you have real content + working pages + the correct AdSense code. -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXX"
+          crossorigin="anonymous"></script>
 
-<meta name="description" content="Solve Wordle instantly. Enter known letters, include letters, and exclude letters to find matching 5-letter words. Fast and free solver.">
-<meta name="robots" content="index, follow">
-<link rel="canonical" href="https://letterpatternsolver.com/">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #0f172a;
+      --muted: #475569;
+      --border: #e2e8f0;
+      --soft: #f8fafc;
+      --soft2: #f1f5f9;
+      --link: #2563eb;
+      --linkHover: #1d4ed8;
+      --shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+      --radius: 12px;
+      --radius2: 10px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
 
-<style>
-:root{
-  --bg:#eef2f3;
-  --card:#ffffff;
-  --border:#d0d7dc;
-  --text:#12343b;
-  --muted:#6b7c80;
-  --accent:#1f5a64;
-}
+    html, body { background: var(--bg); color: var(--fg); font-family: var(--sans); margin: 0; padding: 0; }
+    a { color: var(--link); text-decoration: none; }
+    a:hover { color: var(--linkHover); text-decoration: underline; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 18px; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0 6px; }
+    .brand { display: flex; align-items: baseline; gap: 10px; }
+    .brand h1 { font-size: 20px; margin: 0; letter-spacing: -0.01em; }
+    .brand .tag { font-size: 13px; color: var(--muted); }
+    nav { display: flex; gap: 14px; font-size: 14px; }
+    nav a { color: var(--muted); }
+    nav a:hover { color: var(--fg); }
 
-*{box-sizing:border-box;}
+    .grid { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 16px; align-items: start; }
+    @media (max-width: 920px) { .grid { grid-template-columns: 1fr; } }
 
-body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
-  background:var(--bg);
-  padding:20px;
-  color:var(--text);
-}
+    .card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+    .card .inner { padding: 16px; }
+    .card h2 { margin: 0 0 10px; font-size: 16px; letter-spacing: -0.01em; }
+    .card p { margin: 10px 0; color: var(--muted); line-height: 1.55; }
+    .hero { padding: 16px; border: 1px solid var(--border); background: var(--soft); border-radius: var(--radius); }
+    .hero h2 { margin: 0 0 8px; font-size: 18px; }
+    .hero p { margin: 0; color: var(--muted); line-height: 1.55; }
 
-.container{
-  max-width:520px;
-  margin:auto;
-}
+    .controls { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 12px; }
+    @media (max-width: 560px) { .controls { grid-template-columns: 1fr; } }
 
-.card{
-  background:var(--card);
-  padding:24px;
-  border-radius:16px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.1);
-}
+    input[type="text"]{
+      width: 100%;
+      font-size: 16px;
+      padding: 12px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius2);
+      outline: none;
+      background: #fff;
+    }
+    input[type="text"]:focus { border-color: #93c5fd; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12); }
 
-h1{ margin:0; text-align:center; }
-.subtitle{ text-align:center; color:var(--muted); margin:6px 0 18px; }
+    button {
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius2);
+      background: var(--fg);
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    button:hover { filter: brightness(0.95); }
+    button:disabled { background: #94a3b8; cursor: not-allowed; }
 
-.box-row{
-  display:grid;
-  grid-template-columns:repeat(5, minmax(0, 1fr));
-  gap:8px;
-  margin-bottom:16px;
-}
+    .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      background: var(--soft2);
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .pill code { font-family: var(--mono); font-size: 12px; color: var(--fg); background: #fff; padding: 2px 6px; border-radius: 999px; border: 1px solid var(--border); }
+    .pill button {
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 999px;
+      background: #fff;
+      color: var(--fg);
+    }
+    .pill button:hover { background: #f8fafc; }
 
-.box{
-  width:100%;
-  aspect-ratio:1;
-  font-size:24px;
-  border:2px solid var(--border);
-  border-radius:8px;
-  text-align:center;
-  text-transform:uppercase;
-  padding:0;
-}
+    .meta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; color: var(--muted); font-size: 13px; }
+    .meta span { display: inline-flex; align-items: center; gap: 6px; }
+    .meta code { font-family: var(--mono); background: #fff; border: 1px solid var(--border); padding: 2px 6px; border-radius: 8px; color: var(--fg); }
 
-label{ display:block; margin-top:10px; }
+    .results {
+      margin-top: 12px;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+    }
+    .resultsHeader { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .resultsHeader .count { font-size: 14px; color: var(--muted); }
+    .resultsHeader .count strong { color: var(--fg); }
+    .resultsHeader .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .resultsHeader .actions button { background: #fff; color: var(--fg); }
 
-input.text{
-  width:100%;
-  padding:12px;
-  border-radius:8px;
-  border:1px solid var(--border);
-  font-size:16px; /* prevents iOS zoom */
-}
+    .list {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+    @media (max-width: 740px) { .list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 440px) { .list { grid-template-columns: 1fr; } }
 
-.buttons{
-  display:flex;
-  gap:8px;
-  margin-top:12px;
-}
+    .word {
+      padding: 10px 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+    }
+    .word .w { font-family: var(--mono); font-size: 14px; letter-spacing: 0.02em; }
+    .word .len { color: var(--muted); font-size: 12px; }
 
-button{
-  flex:1;
-  padding:12px;
-  border:none;
-  border-radius:8px;
-  background:var(--accent);
-  color:white;
-  font-size:16px;
-  font-weight:700;
-}
+    .note { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.55; }
+    footer { margin: 18px 0 8px; color: var(--muted); font-size: 13px; }
+    footer .links { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
 
-button.secondary{
-  background:#fff;
-  color:var(--accent);
-  border:2px solid var(--border);
-}
+    /* Ad containers should not dominate the layout; keep them in normal content flow */
+    .adbox { padding: 12px; }
+    .adlabel { font-size: 12px; color: var(--muted); margin: 0 0 8px; }
+  </style>
 
-.results{
-  margin-top:16px;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
-}
-
-.word{
-  padding:8px;
-  background:#f0f4f6;
-  border-radius:6px;
-  text-align:center;
-  font-weight:700;
-  letter-spacing:1px;
-  user-select:none;
-  cursor:pointer;
-}
-
-.seo{
-  margin-top:24px;
-  font-size:15px;
-  color:var(--muted);
-}
-
-.seo h2, .seo h3{
-  color:var(--text);
-  margin:14px 0 8px;
-}
-
-.popular{
-  margin-top:10px;
-  margin-bottom:12px;
-}
-
-.popular a{
-  display:block;
-  margin:6px 0;
-  color:var(--accent);
-  text-decoration:none;
-  font-weight:600;
-}
-
-footer{
-  margin-top:20px;
-  text-align:center;
-  font-size:14px;
-}
-
-footer a{
-  margin:0 8px;
-  color:var(--accent);
-  text-decoration:none;
-}
-</style>
-
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Letter Pattern Solver",
+    "url": "https://letterpatternsolver.com/",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "All",
+    "description": "Find English words that match a letter pattern using underscores for unknown letters. Useful for crosswords and word games."
+  }
+  </script>
 </head>
+
 <body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <h1>Letter Pattern Solver</h1>
+        <div class="tag">Find words that match a pattern</div>
+      </div>
+      <nav aria-label="Primary">
+        <a href="/" aria-current="page">Home</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/contact.html">Contact</a>
+      </nav>
+    </header>
 
-<div class="container">
-<div class="card">
+    <div class="grid">
+      <main class="card" aria-label="Pattern solver">
+        <div class="inner">
+          <div class="hero">
+            <h2>Type a pattern. Get matching words.</h2>
+            <p>
+              Use <strong>underscores</strong> (<code>_</code>) for unknown letters. For example, <code>A__LE</code>
+              can match words like <code>APPLE</code> or <code>ANGLE</code>. This tool runs in your browser and returns
+              matches instantly once the word list is loaded.
+            </p>
+          </div>
 
-<h1>5-Letter Word Solver</h1>
-<div class="subtitle">Find Wordle candidates instantly</div>
+          <form id="solverForm" autocomplete="off" spellcheck="false" novalidate>
+            <div class="controls">
+              <label style="display:block;">
+                <span style="display:block;font-size:13px;color:var(--muted);margin:10px 0 6px;">Pattern</span>
+                <input
+                  id="pattern"
+                  type="text"
+                  placeholder="Example: A__LE or __ING"
+                  inputmode="text"
+                  autocomplete="off"
+                  autocapitalize="characters"
+                  autocorrect="off"
+                  spellcheck="false"
+                  aria-describedby="patternHelp"
+                />
+              </label>
+              <div style="display:flex;flex-direction:column;gap:10px;justify-content:flex-end;">
+                <button id="solveBtn" type="submit" disabled>Search</button>
+                <button id="clearBtn" type="button" style="background:#fff;color:var(--fg);">Clear</button>
+              </div>
+            </div>
 
-<div class="box-row" id="boxes"></div>
+            <div class="meta" id="patternHelp">
+              <span>Unknown: <code>_</code></span>
+              <span>Letters: <code>A–Z</code></span>
+              <span>Loaded words: <code id="dictCount">0</code></span>
+              <span>Status: <code id="dictStatus">loading…</code></span>
+            </div>
 
-<label>Include letters</label>
-<input id="include" class="text" placeholder="e.g. re"
-  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <div class="row" style="margin-top:12px;">
+              <div class="pill">
+                Popular:
+                <code>__ING</code>
+                <button type="button" data-sample="__ING" aria-label="Use pattern __ING">Use</button>
+              </div>
+              <div class="pill">
+                Popular:
+                <code>A__LE</code>
+                <button type="button" data-sample="A__LE" aria-label="Use pattern A__LE">Use</button>
+              </div>
+              <div class="pill">
+                Popular:
+                <code>RE___</code>
+                <button type="button" data-sample="RE___" aria-label="Use pattern RE___">Use</button>
+              </div>
+              <div class="pill">
+                Popular:
+                <code>__TION</code>
+                <button type="button" data-sample="__TION" aria-label="Use pattern __TION">Use</button>
+              </div>
+            </div>
 
-<label>Exclude letters</label>
-<input id="exclude" class="text" placeholder="e.g. snl"
-  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <div class="results" aria-live="polite" aria-busy="false">
+              <div class="resultsHeader">
+                <div class="count">
+                  Matches: <strong id="matchCount">0</strong>
+                </div>
+                <div class="actions">
+                  <button id="copyBtn" type="button" disabled>Copy results</button>
+                  <button id="downloadBtn" type="button" disabled>Download .txt</button>
+                </div>
+              </div>
+              <div id="resultsList" class="list" aria-label="Results"></div>
+              <div class="note" id="note">
+                Tip: for best results, use a fixed-length pattern (e.g., <code>____</code> for 4-letter words).
+                This solver currently matches only the length you provide. If you want “contains” matching
+                (like words that include <code>ING</code> anywhere), you can use underscores on both sides (e.g., <code>__ING__</code>)
+                as long as you know the target word length.
+              </div>
+            </div>
+          </form>
 
-<div class="buttons">
-  <button class="secondary" id="doneBtn" type="button">Done</button>
-  <button id="resetBtn" type="button">Reset</button>
-</div>
+          <!-- High-value content section (AdSense wants real publisher content on the page) -->
+          <section style="margin-top:16px;">
+            <h2>What is a letter pattern solver?</h2>
+            <p>
+              A letter pattern solver helps you find words that match a specific arrangement of known and unknown letters.
+              You provide a pattern such as <code>A__LE</code> where the underscores represent letters you do not know yet.
+              The solver searches a dictionary and returns words of the same length that fit the pattern. This approach is
+              commonly used for crossword puzzles, word search games, and “hangman”-style guessing. It can also be helpful
+              when you remember only some letters of a word and want to quickly explore likely candidates.
+            </p>
+            <p>
+              Pattern-based searching is different from a typical “contains” search. In a pattern search, each character
+              position matters. If the first letter is <code>A</code>, every result must start with <code>A</code>.
+              If the last letter is <code>E</code>, every result must end with <code>E</code>. Underscores allow you
+              to leave unknown positions open while still enforcing the letters you do know. Because the matching is strict,
+              the results are usually more relevant than broad searches, and you can reduce the list quickly by filling in
+              one or two additional letters as you learn them.
+            </p>
 
-<div id="count" class="subtitle" style="margin-top:14px;">Loading…</div>
+            <h2>How to use this tool</h2>
+            <p>
+              Enter your pattern using letters <code>A</code> through <code>Z</code> and underscores <code>_</code>.
+              The solver will treat the pattern length as fixed, so <code>____</code> searches for 4-letter words while
+              <code>________</code> searches for 8-letter words. If you are solving a crossword clue and already know the
+              answer length, start by typing the correct number of underscores and then replace the underscores with the
+              letters you have confirmed. If you are using this for a word game, the same strategy works: keep the pattern
+              length fixed and refine it as you gain information.
+            </p>
+            <p>
+              Example: Suppose your crossword answer is 5 letters and you know it starts with <code>A</code> and ends with
+              <code>E</code>. Enter <code>A___E</code>. If you later learn the third letter is <code>P</code>, update the
+              pattern to <code>A_P_E</code>. Each update narrows the match set. If the list becomes too long, add one more
+              known letter. If the list becomes empty, double-check that the pattern length is correct and that each known
+              letter is in the right position.
+            </p>
 
-<div id="results" class="results"></div>
+            <h2>Common use cases</h2>
+            <p>
+              People use letter pattern tools for many practical tasks. Crossword solvers often have several intersecting
+              words, so even one or two letters can lock in the answer. Word game players use patterns to test hypotheses,
+              learn new vocabulary, and compare alternative guesses. Students and writers sometimes use pattern matching to
+              find words that fit a rhyme or a specific structure when brainstorming. In each case, the goal is the same:
+              reduce uncertainty by using partial information (known letters) while leaving the unknown letters flexible
+              (underscores).
+            </p>
 
-<div id="status" class="subtitle" style="margin-top:10px;">Loading word lists…</div>
+            <h2>Dictionary and accuracy</h2>
+            <p>
+              Results depend on the dictionary used. This page attempts to load a word list from <code>/words.txt</code>
+              (one word per line). If that file is not present, the page falls back to a small built-in list so the tool
+              still works. For best coverage, you should host a reasonably large English word list at <code>/words.txt</code>.
+              Words are normalized to uppercase letters <code>A–Z</code> and the solver ignores entries with hyphens,
+              apostrophes, or non-letter characters.
+            </p>
 
-<div class="seo">
-  <h2>How to use this solver</h2>
-  <p>
-    Enter known letters in the boxes (leave unknowns blank). Add letters that must be included or excluded.
-    Results update automatically and can be shared with a link.
-  </p>
+            <h2>Privacy</h2>
+            <p>
+              This solver performs matching in your browser. The pattern you type is not sent to a server by this page.
+              Please review the <a href="/privacy.html">Privacy Policy</a> for details about analytics or advertising
+              features you may enable. If you add ads, remember that ad scripts are loaded from third parties and may
+              set cookies or collect device information as described in their policies.
+            </p>
+          </section>
+        </div>
+      </main>
 
-  <h3>Popular searches</h3>
-  <div class="popular">
-    <!-- Option C clean URLs -->
-    <a href="/5-letter-words-ending-in-er/">5 letter words ending in ER</a>
-    <a href="/5-letter-words-starting-with-s/">5 letter words starting with S</a>
-    <a href="/5-letter-words-with-a-in-the-middle/">5 letter words with A in the middle</a>
-    <a href="/5-letter-words-with-r-and-e/">5 letter words with R and E</a>
+      <aside class="card" aria-label="Sidebar">
+        <div class="inner">
+          <h2>Ads</h2>
+          <p>
+            AdSense requires that ads appear alongside meaningful publisher content. This page includes substantial
+            explanatory content so it is not “just a tool.”
+          </p>
+
+          <div class="adbox card" style="box-shadow:none;">
+            <div class="inner">
+              <p class="adlabel">Advertisement</p>
+              <!-- Responsive Ad Unit -->
+              <!-- Replace data-ad-slot with your real slot -->
+              <ins class="adsbygoogle"
+                   style="display:block"
+                   data-ad-client="ca-pub-XXXXXXXXXXXXXXX"
+                   data-ad-slot="1234567890"
+                   data-ad-format="auto"
+                   data-full-width-responsive="true"></ins>
+              <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+              </script>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <h2>Quick links</h2>
+            <p style="margin:8px 0;">
+              <a href="/privacy.html">Privacy Policy</a><br />
+              <a href="/contact.html">Contact</a><br />
+              <a href="/sitemap.xml">Sitemap</a><br />
+              <a href="/robots.txt">Robots</a>
+            </p>
+          </div>
+
+          <div style="margin-top:12px;">
+            <h2>Troubleshooting</h2>
+            <p>
+              If AdSense still flags “screens without publisher content,” ensure this exact page is the one being reviewed,
+              and that the content is visible without requiring clicks, popups, or navigation.
+            </p>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      <div class="links">
+        <a href="/privacy.html">Privacy</a>
+        <a href="/contact.html">Contact</a>
+      </div>
+      <div>
+        © <span id="year"></span> letterpatternsolver.com. Built as a simple pattern-matching utility for word puzzles.
+      </div>
+    </footer>
   </div>
 
-  <h3>Browse word lists</h3>
-  <p>
-    Prefer browsing? Use our static word list pages for common patterns like
-    <strong>starting letters</strong> and <strong>common endings</strong>.
-  </p>
-  <div class="popular">
-    <a href="/5-letter-word-lists/">All 5-letter word lists</a>
-    <a href="/5-letter-words-starting-with-r/">5 letter words starting with R</a>
-    <a href="/5-letter-words-starting-with-t/">5 letter words starting with T</a>
-    <a href="/5-letter-words-ending-in-ed/">5 letter words ending in ED</a>
-    <a href="/5-letter-words-ending-in-es/">5 letter words ending in ES</a>
-  </div>
-  <p style="margin-top:10px;">
-    Tip: if you know multiple letter positions, the solver above is faster than browsing lists.
-  </p>
-</div>
+  <script>
+    // --- Configuration ---
+    // Recommended: host a newline-delimited word list at /words.txt
+    // (Example format: APPLE\nANGLE\nAMBLE\n...)
+    const WORDS_TXT_URL = "/words.txt";
 
-<footer>
-  <a href="/privacy.html">Privacy</a>
-  <a href="/about.html">About</a>
-  <a href="/contact.html">Contact</a>
-</footer>
+    // Small fallback list so the page works even without /words.txt
+    const FALLBACK_WORDS = [
+      "APPLE","ANGLE","AMBLE","AMPLE","ANODE","ALIEN","ALONE","ABIDE","ABOUT","ABOVE",
+      "BRING","THING","SING","RING","WING","KING","BINGE","STRING","SPRING",
+      "REACT","READY","REALM","REBEL","RECAP","RECON","RELAY","RENEW","RETRY",
+      "ACTION","NATION","RATION","MOTION","OPTION","NOTION","LOTION",
+      "STONE","SHONE","PHONE","CRANE","PLANE","SLATE","PLATE","STATE",
+      "TRACE","TRACK","TRAIL","TRAIN","TRIBE","TRICK","TRITE"
+    ];
 
-</div>
-</div>
+    // --- DOM ---
+    const yearEl = document.getElementById("year");
+    const patternEl = document.getElementById("pattern");
+    const solveBtn = document.getElementById("solveBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const dictCountEl = document.getElementById("dictCount");
+    const dictStatusEl = document.getElementById("dictStatus");
+    const matchCountEl = document.getElementById("matchCount");
+    const resultsListEl = document.getElementById("resultsList");
+    const copyBtn = document.getElementById("copyBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const solverForm = document.getElementById("solverForm");
 
-<script>
-let answers = [];
-let allowed = [];
-let ready = false;
+    yearEl.textContent = new Date().getFullYear();
 
-function parse(t){
-  return t
-    .split(/\r?\n/)
-    .map(x => x.trim().toLowerCase())
-    .filter(x => /^[a-z]{5}$/.test(x));
-}
+    let DICT = [];
+    let lastResults = [];
 
-function createBoxes(){
-  const container = document.getElementById("boxes");
-  container.innerHTML = "";
+    function normalizePattern(raw) {
+      return (raw || "")
+        .trim()
+        .toUpperCase()
+        .replace(/\s+/g, "")
+        .replace(/[^A-Z_]/g, ""); // only A-Z and underscores
+    }
 
-  for(let i=0;i<5;i++){
-    const input = document.createElement("input");
-    input.className = "box";
-    input.maxLength = 1;
+    function patternToRegex(pattern) {
+      // Strict length match: underscores = any letter
+      // Example A__LE -> ^A..LE$
+      const escaped = pattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const reStr = "^" + escaped.replace(/_/g, "[A-Z]") + "$";
+      return new RegExp(reStr);
+    }
 
-    // Prevent mobile “help”
-    input.autocomplete = "off";
-    input.autocorrect = "off";
-    input.autocapitalize = "off";
-    input.spellcheck = false;
-    input.inputMode = "latin";
+    function renderResults(words) {
+      resultsListEl.innerHTML = "";
+      matchCountEl.textContent = String(words.length);
+      lastResults = words.slice();
 
-    input.addEventListener("input", () => {
-      input.value = (input.value || "")
-        .replace(/[^a-zA-Z]/g,"")
-        .slice(0,1)
-        .toUpperCase();
+      copyBtn.disabled = words.length === 0;
+      downloadBtn.disabled = words.length === 0;
 
-      if(input.value && input.nextElementSibling){
-        input.nextElementSibling.focus();
+      for (const w of words) {
+        const item = document.createElement("div");
+        item.className = "word";
+        const left = document.createElement("div");
+        left.className = "w";
+        left.textContent = w;
+
+        const right = document.createElement("div");
+        right.className = "len";
+        right.textContent = w.length;
+
+        item.appendChild(left);
+        item.appendChild(right);
+        resultsListEl.appendChild(item);
       }
-      solve();
+    }
+
+    function search(pattern) {
+      const p = normalizePattern(pattern);
+      patternEl.value = p;
+
+      if (!p || p.length === 0) {
+        renderResults([]);
+        return;
+      }
+
+      const re = patternToRegex(p);
+      const matches = DICT.filter(w => w.length === p.length && re.test(w));
+      renderResults(matches);
+    }
+
+    async function loadWords() {
+      dictStatusEl.textContent = "loading…";
+      try {
+        const res = await fetch(WORDS_TXT_URL, { cache: "force-cache" });
+        if (!res.ok) throw new Error("words.txt not found");
+        const text = await res.text();
+        const words = text
+          .split(/\r?\n/)
+          .map(s => s.trim().toUpperCase())
+          .filter(Boolean)
+          .filter(w => /^[A-Z]+$/.test(w));
+
+        DICT = Array.from(new Set(words)); // de-dupe
+        dictCountEl.textContent = String(DICT.length);
+        dictStatusEl.textContent = "ready";
+      } catch (e) {
+        // fallback
+        DICT = Array.from(new Set(FALLBACK_WORDS));
+        dictCountEl.textContent = String(DICT.length);
+        dictStatusEl.textContent = "ready (fallback)";
+      } finally {
+        solveBtn.disabled = false;
+      }
+    }
+
+    // Events
+    solverForm.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      search(patternEl.value);
     });
 
-    input.addEventListener("keydown", (e) => {
-      if(e.key === "Backspace" && !input.value && input.previousElementSibling){
-        input.previousElementSibling.focus();
+    clearBtn.addEventListener("click", () => {
+      patternEl.value = "";
+      patternEl.focus();
+      renderResults([]);
+    });
+
+    patternEl.addEventListener("input", () => {
+      // Optional: live normalize while typing; do not auto-run search (keeps it predictable)
+      const norm = normalizePattern(patternEl.value);
+      if (norm !== patternEl.value) patternEl.value = norm;
+    });
+
+    document.querySelectorAll('button[data-sample]').forEach(btn => {
+      btn.addEventListener("click", () => {
+        const sample = btn.getAttribute("data-sample");
+        patternEl.value = sample;
+        patternEl.focus();
+        search(sample);
+      });
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      const text = lastResults.join("\n");
+      try {
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = "Copied";
+        setTimeout(() => (copyBtn.textContent = "Copy results"), 1200);
+      } catch {
+        // fallback prompt
+        window.prompt("Copy results:", text);
       }
     });
 
-    container.appendChild(input);
-  }
-
-  // Paste 5 letters to fill row
-  container.addEventListener("paste", (e) => {
-    const txt = (e.clipboardData || window.clipboardData).getData("text") || "";
-    const paste = txt.toUpperCase().replace(/[^A-Z]/g,"").slice(0,5);
-    if(paste.length === 5){
-      e.preventDefault();
-      const boxes = document.querySelectorAll(".box");
-      boxes.forEach((b,i) => b.value = paste[i] || "");
-      solve();
-    }
-  }, { passive:false });
-}
-
-function getPattern(){
-  return [...document.querySelectorAll(".box")]
-    .map(b => b.value ? b.value.toLowerCase() : "_")
-    .join("");
-}
-
-function setPattern(patRaw){
-  const pat = (patRaw || "")
-    .toLowerCase()
-    .replace(/[^a-z_]/g,"")
-    .padEnd(5,"_")
-    .slice(0,5);
-
-  const boxes = document.querySelectorAll(".box");
-  for(let i=0;i<5;i++){
-    boxes[i].value = (pat[i] === "_" ? "" : pat[i].toUpperCase());
-  }
-}
-
-function hasConstraints(pattern, include, exclude){
-  return pattern !== "_____" || include.length > 0 || exclude.length > 0;
-}
-
-function updateUrl(pattern, include, exclude){
-  const url = new URL(window.location.href);
-
-  if(!hasConstraints(pattern, include, exclude)){
-    url.search = "";
-    history.replaceState({}, "", url.toString());
-    return;
-  }
-
-  url.searchParams.set("pattern", pattern);
-  if(include) url.searchParams.set("include", include); else url.searchParams.delete("include");
-  if(exclude) url.searchParams.set("exclude", exclude); else url.searchParams.delete("exclude");
-
-  history.replaceState({}, "", url.toString());
-}
-
-function solve(){
-  if(!ready) return;
-
-  const pattern = getPattern();
-  const include = (document.getElementById("include").value || "").toLowerCase().replace(/[^a-z]/g,"");
-  const exclude = (document.getElementById("exclude").value || "").toLowerCase().replace(/[^a-z]/g,"");
-
-  updateUrl(pattern, include, exclude);
-
-  if(!hasConstraints(pattern, include, exclude)){
-    document.getElementById("results").innerHTML = "";
-    document.getElementById("count").innerText = "Enter letters to search";
-    return;
-  }
-
-  const words = [...new Set([...answers, ...allowed])];
-
-  const filtered = words.filter(w => {
-    for(let i=0;i<5;i++){
-      if(pattern[i] !== "_" && pattern[i] !== w[i]) return false;
-    }
-    for(const c of include){
-      if(!w.includes(c)) return false;
-    }
-    for(const c of exclude){
-      if(w.includes(c)) return false;
-    }
-    return true;
-  }).sort();
-
-  document.getElementById("count").innerText = `${filtered.length} viable words`;
-
-  const div = document.getElementById("results");
-  div.innerHTML = "";
-
-  filtered.slice(0, 300).forEach(w => {
-    const el = document.createElement("div");
-    el.className = "word";
-    el.innerText = w.toUpperCase();
-    el.addEventListener("click", async () => {
-      try{
-        await navigator.clipboard.writeText(w);
-        document.getElementById("status").innerText = `Copied ${w.toUpperCase()} to clipboard.`;
-        setTimeout(() => document.getElementById("status").innerText = "Ready", 1200);
-      }catch{}
+    downloadBtn.addEventListener("click", () => {
+      const blob = new Blob([lastResults.join("\n")], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "letterpatternsolver-results.txt";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     });
-    div.appendChild(el);
-  });
-}
 
-function clearAll(){
-  document.querySelectorAll(".box").forEach(b => b.value = "");
-  document.getElementById("include").value = "";
-  document.getElementById("exclude").value = "";
-  document.getElementById("results").innerHTML = "";
-  document.getElementById("count").innerText = "Enter letters to search";
-
-  const url = new URL(window.location.href);
-  url.search = "";
-  history.replaceState({}, "", url.toString());
-}
-
-function dismissKeyboard(){
-  document.activeElement?.blur();
-  const results = document.getElementById("results");
-  if(results && results.children.length > 0){
-    results.scrollIntoView({ behavior:"smooth", block:"start" });
-  }
-}
-
-function applyParamsFromUrl(){
-  const sp = new URLSearchParams(window.location.search);
-  const pat = sp.get("pattern");
-  const inc = sp.get("include");
-  const exc = sp.get("exclude");
-
-  if(pat) setPattern(pat);
-  if(typeof inc === "string") document.getElementById("include").value = inc;
-  if(typeof exc === "string") document.getElementById("exclude").value = exc;
-}
-
-async function load(){
-  try{
-    const a = await fetch("/data/answers.txt");
-    const b = await fetch("/data/allowed.txt");
-
-    answers = parse(await a.text());
-    allowed = parse(await b.text());
-
-    ready = true;
-    document.getElementById("status").innerText = "Ready";
-
-    createBoxes();
-    applyParamsFromUrl();
-    solve();
-  }catch(e){
-    document.getElementById("status").innerText = "Failed to load word lists.";
-    document.getElementById("count").innerText = "Error";
-  }
-}
-
-document.getElementById("include").addEventListener("input", solve);
-document.getElementById("exclude").addEventListener("input", solve);
-document.getElementById("resetBtn").addEventListener("click", clearAll);
-document.getElementById("doneBtn").addEventListener("click", dismissKeyboard);
-
-load();
-</script>
-
+    // Kick off
+    loadWords();
+  </script>
 </body>
 </html>
