@@ -1,3 +1,5 @@
+console.log("build-seo running");
+
 // scripts/build-seo.mjs
 import fs from "node:fs";
 import path from "node:path";
