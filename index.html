@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+<!-- AdSense verification code -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-685209934064589"
+     crossorigin="anonymous"></script>
+
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <title>5-Letter Word Solver | LetterPatternSolver</title>
 
-<meta name="description" content="5-letter Word Solver. Find Wordle solutions instantly using letter patterns, included letters, and excluded letters. Fast, accurate, and free.">
+<meta name="description" content="Find Wordle solutions instantly using letter patterns, included letters, and excluded letters. Fast, accurate, and free 5-letter word solver.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://letterpatternsolver.com/">
 
-<!-- Structured data for Google -->
+<!-- Structured data -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -18,8 +23,7 @@
   "name": "LetterPatternSolver",
   "url": "https://letterpatternsolver.com/",
   "applicationCategory": "UtilityApplication",
-  "operatingSystem": "Any",
-  "description": "Tool for finding valid 5-letter words based on letter patterns, includes, and excludes."
+  "description": "Tool for finding valid 5-letter words based on letter patterns."
 }
 </script>
 
@@ -32,10 +36,8 @@
   --accent:#0f4c5c;
   --accent2:#0c3b4a;
   --border:#d9e2e6;
-  --shadow: 0 10px 30px rgba(0,0,0,0.08);
+  --shadow:0 10px 30px rgba(0,0,0,0.08);
 }
-
-*{ box-sizing:border-box; }
 
 body{
   margin:0;
@@ -71,10 +73,8 @@ h1{
 }
 
 .badge{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:8px 10px;
+  display:inline-block;
+  padding:8px 12px;
   border:2px solid var(--border);
   border-radius:12px;
   background:#fff;
@@ -84,7 +84,6 @@ h1{
 
 .topline{
   text-align:center;
-  margin-bottom:10px;
 }
 
 .boxes{
@@ -144,8 +143,6 @@ button{
 
 .meta{
   margin-top:10px;
-  display:flex;
-  justify-content:space-between;
 }
 
 .words{
@@ -160,7 +157,6 @@ button{
   border:2px solid var(--border);
   border-radius:10px;
   text-align:center;
-  cursor:pointer;
 }
 
 .status{
@@ -169,22 +165,23 @@ button{
   color:var(--muted);
 }
 
-.footer{
-  margin-top:20px;
-  text-align:center;
-  color:var(--muted);
-  font-size:13px;
-}
-
 .explainer{
   margin-top:20px;
   font-size:14px;
   color:var(--muted);
 }
-</style>
-</head>
 
+.footer{
+  margin-top:20px;
+  text-align:center;
+  font-size:13px;
+  color:var(--muted);
+}
+</style>
+
+</head>
 <body>
+
 <div class="container">
 <div class="card">
 
@@ -214,13 +211,13 @@ button{
 
 <div class="words" id="results"></div>
 
-<div class="status" id="status">Loading word lists...</div>
+<div class="status" id="status">Loading word list...</div>
 
 <div class="explainer">
 <h2>How to use this Wordle solver</h2>
 <p>
-Enter known letters into the boxes above. Add letters that must be included or excluded.
-This tool instantly filters valid 5-letter words using the official Wordle word list.
+Enter known letters into the boxes. Add letters to include or exclude.
+This tool instantly finds valid Wordle answers using the official word list.
 </p>
 </div>
 
@@ -234,6 +231,7 @@ This tool instantly filters valid 5-letter words using the official Wordle word 
 </div>
 
 <script>
+
 let answers=[]
 let allowed=[]
 let ready=false
@@ -250,66 +248,82 @@ allowed=parse(await (await fetch("/data/allowed.txt")).text())
 ready=true
 document.getElementById("status").innerText="Ready"
 
-renderBoxes("_____")
+renderBoxes()
 }
 
-function renderBoxes(p){
-let b=document.getElementById("boxes")
-b.innerHTML=""
+function renderBoxes(){
+
+let container=document.getElementById("boxes")
+container.innerHTML=""
+
 for(let i=0;i<5;i++){
-let x=document.createElement("input")
-x.className="box"
-x.maxLength=1
-x.oninput=solve
-b.appendChild(x)
+
+let box=document.createElement("input")
+
+box.className="box"
+box.maxLength=1
+
+box.oninput=solve
+
+container.appendChild(box)
+
 }
 }
 
 function getPattern(){
+
 return [...document.querySelectorAll(".box")]
 .map(x=>x.value||"_").join("").toLowerCase()
+
 }
 
 function solve(){
 
 if(!ready)return
 
-let pat=getPattern()
+let pattern=getPattern()
+
 let include=document.getElementById("include").value.toLowerCase()
 let exclude=document.getElementById("exclude").value.toLowerCase()
 
-if(pat=="_____" && !include && !exclude){
+if(pattern=="_____" && !include && !exclude){
+
 document.getElementById("results").innerHTML=""
 document.getElementById("count").innerText="Enter letters to search"
+
 return
 }
 
 let list=[...new Set([...answers,...allowed])]
 
-let r=list.filter(w=>{
+let results=list.filter(word=>{
 
 for(let i=0;i<5;i++)
-if(pat[i]!="_" && w[i]!=pat[i])return false
+if(pattern[i]!="_" && word[i]!=pattern[i])return false
 
 for(let c of include)
-if(!w.includes(c))return false
+if(!word.includes(c))return false
 
 for(let c of exclude)
-if(w.includes(c))return false
+if(word.includes(c))return false
 
 return true
+
 })
 
-document.getElementById("count").innerText=r.length+" viable words"
+document.getElementById("count").innerText=results.length+" viable words"
 
-let out=document.getElementById("results")
-out.innerHTML=""
+let container=document.getElementById("results")
+container.innerHTML=""
 
-r.forEach(w=>{
-let d=document.createElement("div")
-d.className="word"
-d.innerText=w
-out.appendChild(d)
+results.forEach(word=>{
+
+let div=document.createElement("div")
+div.className="word"
+div.innerText=word
+
+container.appendChild(div)
+
 })
 
 }
@@ -319,13 +333,19 @@ document.activeElement.blur()
 }
 
 function resetAll(){
-renderBoxes("_____")
+
+renderBoxes()
+
 document.getElementById("include").value=""
 document.getElementById("exclude").value=""
+
 document.getElementById("results").innerHTML=""
+document.getElementById("count").innerText="Enter letters to search"
+
 }
 
 load()
+
 </script>
 
 </body>
