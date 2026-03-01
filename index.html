@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Letter Pattern Solver</title>
+
+<title>5-Letter Word Solver | LetterPatternSolver</title>
+
 <style>
 :root{
   --bg:#f4f7f8;
@@ -40,10 +42,15 @@ body{
 
 h1{
   text-align:center;
-  margin:0 0 18px;
+  margin-bottom:4px;
   font-size:34px;
-  letter-spacing:0.2px;
-  color:#0f3d48;
+}
+
+.subtitle{
+  text-align:center;
+  color:var(--muted);
+  font-size:15px;
+  margin-bottom:14px;
 }
 
 .row-center{
@@ -72,17 +79,14 @@ select{
   font-size:14px;
   color:var(--muted);
 }
-.toggle input{ transform: scale(1.1); }
 
 .boxes{
   display:flex;
   justify-content:center;
   gap:8px;
-  margin:18px 0 18px;
-  flex-wrap:nowrap;
+  margin:18px 0;
 }
 
-/* Each box is now a real input */
 .box{
   width: clamp(44px, calc((100vw - 18px*2 - 22px*2 - 8px*4) / 5), 72px);
   height: clamp(44px, calc((100vw - 18px*2 - 22px*2 - 8px*4) / 5), 72px);
@@ -92,62 +96,47 @@ select{
   text-align:center;
   font-size: clamp(18px, 5vw, 30px);
   font-weight:650;
-  color:#163d45;
   outline:none;
-  padding:0;
-  line-height:1;
-  text-transform: uppercase;
-  -webkit-appearance:none;
+  text-transform:uppercase;
 }
+
 .box:focus{
-  border-color: rgba(15,76,92,.55);
-  box-shadow: 0 0 0 4px rgba(15,76,92,.12);
+  border-color:var(--accent);
 }
 
-label{
-  font-size:13px;
-  color:var(--muted);
-  display:block;
-  margin-top:14px;
-  margin-bottom:6px;
-  letter-spacing:0.4px;
-}
-
-/* Hide the pattern text input as requested */
 #patternRow{ display:none; }
 
 input.text{
   width:100%;
-  padding:12px 12px;
+  padding:12px;
   border-radius:12px;
   border:2px solid var(--border);
   font-size:16px;
-  outline:none;
 }
 
 button{
   width:100%;
   margin-top:18px;
-  padding:16px 14px;
+  padding:16px;
   background:linear-gradient(180deg,var(--accent),var(--accent2));
   color:white;
   border:none;
   border-radius:16px;
   font-size:20px;
   font-weight:700;
-  box-shadow:0 14px 30px rgba(15,76,92,0.22);
 }
-button:active{ transform: translateY(1px); }
 
 .meta{
   display:flex;
   justify-content:space-between;
-  align-items:center;
   margin-top:14px;
   color:var(--muted);
-  font-size:14px;
 }
-.meta a{ color:var(--muted); text-decoration:underline; cursor:pointer; }
+
+.meta a{
+  cursor:pointer;
+  text-decoration:underline;
+}
 
 .words{
   margin-top:12px;
@@ -157,301 +146,223 @@ button:active{ transform: translateY(1px); }
 }
 
 .word{
-  padding:10px 10px;
-  text-align:center;
+  padding:10px;
   border-radius:12px;
   border:2px solid var(--border);
-  background:white;
+  text-align:center;
   font-weight:700;
   letter-spacing:2px;
-  color:#173f47;
-  user-select:none;
+  cursor:pointer;
 }
 
 .status{
   margin-top:10px;
-  color:var(--muted);
-  font-size:13px;
   text-align:center;
+  font-size:13px;
+  color:var(--muted);
 }
 
 .footer{
-  margin-top:14px;
+  margin-top:18px;
   text-align:center;
+  font-size:13px;
   color:var(--muted);
-  font-size:12px;
 }
 
-@media (max-width: 430px){
-  h1{ font-size:28px; }
-  .words{ grid-template-columns:repeat(2,1fr); }
+.footer a{
+  color:var(--muted);
 }
+
 </style>
 </head>
 
 <body>
+
 <div class="container">
-  <div class="card">
-    <h1>Fill-in-the-Blanks Search</h1>
+<div class="card">
 
-    <div class="row-center">
-      <select id="length" disabled>
-        <option value="5" selected>5 letters</option>
-      </select>
+<h1>5-Letter Word Solver</h1>
+<div class="subtitle">Find Wordle solutions instantly</div>
 
-      <label class="toggle" title="Answers only searches the official solution list. All valid guesses includes accepted non-solution words too.">
-        <input type="checkbox" id="useAll" />
-        All valid guesses
-      </label>
-    </div>
+<div class="row-center">
+<select disabled>
+<option>5 letters</option>
+</select>
 
-    <!-- Tappable boxes -->
-    <div class="boxes" id="boxes" aria-label="Pattern boxes"></div>
+<label class="toggle">
+<input type="checkbox" id="useAll">
+All valid guesses
+</label>
+</div>
 
-    <!-- Hidden pattern input (kept for internal syncing) -->
-    <div id="patternRow">
-      <label>PATTERN (_ = unknown)</label>
-      <input id="pattern" class="text" placeholder="_____" maxlength="5" autocapitalize="none" spellcheck="false" />
-    </div>
+<div class="boxes" id="boxes"></div>
 
-    <label>INCLUDE LETTERS (yellow)</label>
-    <input id="include" class="text" autocapitalize="none" spellcheck="false" />
+<div id="patternRow">
+<input id="pattern">
+</div>
 
-    <label>EXCLUDE LETTERS (gray)</label>
-    <input id="exclude" class="text" autocapitalize="none" spellcheck="false" />
+<label>Include letters</label>
+<input id="include" class="text">
 
-    <button id="searchBtn">Search</button>
+<label>Exclude letters</label>
+<input id="exclude" class="text">
 
-    <div class="meta">
-      <span id="count">0 viable words</span>
-      <a id="resetLink">Reset</a>
-    </div>
+<button onclick="solve()">Search</button>
 
-    <div class="words" id="results"></div>
-    <div class="status" id="status">Loading word lists…</div>
+<div class="meta">
+<span id="count">0 viable words</span>
+<a onclick="resetAll()">Reset</a>
+</div>
 
-    <div class="footer">Not affiliated with Wordle or The New York Times.</div>
-  </div>
+<div class="words" id="results"></div>
+
+<div class="status" id="status">Loading word lists…</div>
+
+<div class="footer">
+<a href="/privacy.html">Privacy</a> |
+<a href="/about.html">About</a> |
+<a href="/contact.html">Contact</a>
+<br><br>
+Not affiliated with Wordle or The New York Times
+</div>
+
+</div>
 </div>
 
 <script>
-const $ = (id) => document.getElementById(id);
 
-let ANSWERS = [];
-let ALLOWED = [];
-let READY = false;
+let ANSWERS=[]
+let ALLOWED=[]
+let READY=false
 
-function normalizeLetters(s){ return (s || "").toLowerCase().replace(/[^a-z]/g, ""); }
-
-function parseWordFile(text){
-  return text
-    .split(/\r?\n/)
-    .map(s => s.trim().toLowerCase())
-    .filter(w => /^[a-z]{5}$/.test(w));
+function parse(text){
+return text.split(/\n/).map(x=>x.trim()).filter(x=>x.length==5)
 }
 
 async function loadLists(){
-  try{
-    const [a, g] = await Promise.all([
-      fetch("/data/answers.txt", { cache: "no-store" }),
-      fetch("/data/allowed.txt", { cache: "no-store" })
-    ]);
 
-    if(!a.ok) throw new Error("answers.txt not found (commit data/answers.txt)");
-    if(!g.ok) throw new Error("allowed.txt not found (commit data/allowed.txt)");
+const a=await fetch("/data/answers.txt")
+const b=await fetch("/data/allowed.txt")
 
-    const answersText = await a.text();
-    const allowedText = await g.text();
+ANSWERS=parse(await a.text())
+ALLOWED=parse(await b.text())
 
-    ANSWERS = parseWordFile(answersText);
-    ALLOWED = parseWordFile(allowedText);
+READY=true
 
-    READY = true;
-    $("status").textContent = `Loaded ${ANSWERS.length.toLocaleString()} answers + ${ALLOWED.length.toLocaleString()} allowed guesses.`;
+document.getElementById("status").innerText=
+`Loaded ${ANSWERS.length} answers + ${ALLOWED.length} guesses`
 
-    // restore state
-    try{
-      const s = JSON.parse(localStorage.getItem("lps_state") || "{}");
-      if (typeof s.useAll === "boolean") $("useAll").checked = s.useAll;
-      if (s.include) $("include").value = s.include;
-      if (s.exclude) $("exclude").value = s.exclude;
-      if (s.pat && typeof s.pat === "string") setBoxesFromPattern(s.pat);
-      else setBoxesFromPattern("_____");
-    }catch{
-      setBoxesFromPattern("_____");
-    }
+renderBoxes("_____")
+solve()
 
-    solve();
-  }catch(err){
-    $("status").textContent = "Word lists failed to load: " + err.message;
-  }
 }
 
-function getActiveList(){
-  if (!$("useAll").checked) return ANSWERS;
+function renderBoxes(pattern){
 
-  // union answers + allowed (avoid duplicates)
-  const set = new Set(ANSWERS);
-  for(const w of ALLOWED) set.add(w);
-  return Array.from(set);
+const boxes=document.getElementById("boxes")
+boxes.innerHTML=""
+
+for(let i=0;i<5;i++){
+
+const inp=document.createElement("input")
+inp.className="box"
+inp.maxLength=1
+inp.value=pattern[i]=="_"?"":pattern[i]
+
+inp.oninput=()=>{
+inp.value=inp.value.replace(/[^a-zA-Z]/,"").toUpperCase()
+
+if(inp.value && i<4)
+boxes.children[i+1].focus()
+
+solve()
 }
 
-function patternFromBoxes(){
-  const inputs = Array.from($("boxes").querySelectorAll("input.box"));
-  const pat = inputs.map(x => {
-    const v = (x.value || "").toLowerCase();
-    return v && /^[a-z]$/.test(v) ? v : "_";
-  }).join("");
-  $("pattern").value = pat; // keep hidden input in sync
-  return pat;
+inp.onkeydown=e=>{
+if(e.key=="Backspace" && !inp.value && i>0)
+boxes.children[i-1].focus()
 }
 
-function setBoxesFromPattern(patRaw){
-  const pat = (patRaw || "").toLowerCase().replace(/[^a-z_]/g, "").padEnd(5,"_").slice(0,5);
-  const boxes = $("boxes");
-  boxes.innerHTML = "";
+boxes.appendChild(inp)
 
-  for (let i = 0; i < 5; i++) {
-    const inp = document.createElement("input");
-    inp.className = "box";
-    inp.type = "text";
-    inp.inputMode = "text";
-    inp.autocomplete = "off";
-    inp.autocapitalize = "characters";
-    inp.spellcheck = false;
-    inp.maxLength = 1;
-    inp.dataset.idx = String(i);
-
-    const c = pat[i];
-    inp.value = (c && c !== "_") ? c.toUpperCase() : "";
-
-    inp.addEventListener("input", (e) => {
-      let v = (e.target.value || "").replace(/[^a-zA-Z]/g, "").slice(0,1);
-      e.target.value = v.toUpperCase();
-
-      patternFromBoxes();
-
-      // auto-advance
-      if (v && i < 4) {
-        const next = boxes.querySelector(`input.box[data-idx="${i+1}"]`);
-        next?.focus();
-      }
-
-      // auto-solve
-      solve();
-    });
-
-    inp.addEventListener("keydown", (e) => {
-      if (e.key === "Backspace" && !inp.value && i > 0) {
-        const prev = boxes.querySelector(`input.box[data-idx="${i-1}"]`);
-        prev?.focus();
-      }
-    });
-
-    inp.addEventListener("focus", () => {
-      setTimeout(() => inp.select(), 0);
-    });
-
-    boxes.appendChild(inp);
-  }
-
-  $("pattern").value = pat;
 }
 
-function filterWords({ pattern, include, exclude }){
-  const pat = (pattern || "_____").toLowerCase();
-  const inc = new Set(normalizeLetters(include).split(""));
-  const exc = new Set(normalizeLetters(exclude).split(""));
-
-  const list = getActiveList();
-
-  return list.filter(word => {
-    // pattern
-    for(let i=0;i<5;i++){
-      if(pat[i] !== "_" && word[i] !== pat[i]) return false;
-    }
-    // exclude
-    for(const c of exc) if(word.includes(c)) return false;
-    // include
-    for(const c of inc) if(!word.includes(c)) return false;
-
-    return true;
-  }).sort();
 }
 
-function renderResults(words){
-  $("count").textContent = `${words.length} viable words`;
-  const container = $("results");
-  container.innerHTML = "";
+function getPattern(){
 
-  for(const w of words){
-    const div = document.createElement("div");
-    div.className = "word";
-    div.textContent = w.toUpperCase();
-    div.addEventListener("click", async () => {
-      try{
-        await navigator.clipboard.writeText(w);
-        $("status").textContent = `Copied ${w.toUpperCase()} to clipboard.`;
-        setTimeout(() => {
-          if (READY) $("status").textContent = `Loaded ${ANSWERS.length.toLocaleString()} answers + ${ALLOWED.length.toLocaleString()} allowed guesses.`;
-        }, 1200);
-      }catch{
-        // clipboard can fail in some iOS contexts; ignore
-      }
-    });
-    container.appendChild(div);
-  }
+return [...document.querySelectorAll(".box")]
+.map(x=>x.value?x.value.toLowerCase():"_").join("")
+
 }
 
-function saveState(pat){
-  localStorage.setItem("lps_state", JSON.stringify({
-    useAll: $("useAll").checked,
-    include: $("include").value,
-    exclude: $("exclude").value,
-    pat: pat
-  }));
+function getList(){
+
+if(document.getElementById("useAll").checked)
+return [...new Set([...ANSWERS,...ALLOWED])]
+
+return ANSWERS
+
 }
 
 function solve(){
-  if(!READY) return;
 
-  const pat = patternFromBoxes();
+if(!READY)return
 
-  const words = filterWords({
-    pattern: pat,
-    include: $("include").value,
-    exclude: $("exclude").value
-  });
+const pattern=getPattern()
+const include=document.getElementById("include").value.toLowerCase()
+const exclude=document.getElementById("exclude").value.toLowerCase()
 
-  renderResults(words);
-  saveState(pat);
+const results=getList().filter(word=>{
+
+for(let i=0;i<5;i++)
+if(pattern[i]!="_" && word[i]!=pattern[i])
+return false
+
+for(const c of include)
+if(!word.includes(c))return false
+
+for(const c of exclude)
+if(word.includes(c))return false
+
+return true
+
+})
+
+document.getElementById("count").innerText=
+`${results.length} viable words`
+
+const container=document.getElementById("results")
+container.innerHTML=""
+
+results.forEach(w=>{
+
+const d=document.createElement("div")
+d.className="word"
+d.innerText=w.toUpperCase()
+
+d.onclick=()=>{
+navigator.clipboard.writeText(w)
+}
+
+container.appendChild(d)
+
+})
+
 }
 
 function resetAll(){
-  $("include").value = "";
-  $("exclude").value = "";
-  $("useAll").checked = false;
-  localStorage.removeItem("lps_state");
 
-  setBoxesFromPattern("_____");
-  $("results").innerHTML = "";
-  $("count").textContent = "0 viable words";
-  if (READY) $("status").textContent = `Loaded ${ANSWERS.length.toLocaleString()} answers + ${ALLOWED.length.toLocaleString()} allowed guesses.`;
+renderBoxes("_____")
+document.getElementById("include").value=""
+document.getElementById("exclude").value=""
+solve()
+
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  setBoxesFromPattern("_____");
+loadLists()
 
-  $("searchBtn").addEventListener("click", solve);
-  $("resetLink").addEventListener("click", resetAll);
-
-  ["include","exclude","useAll"].forEach(id => {
-    $(id).addEventListener("input", solve);
-    $(id).addEventListener("change", solve);
-  });
-
-  loadLists();
-});
 </script>
+
 </body>
 </html>
