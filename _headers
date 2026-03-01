@@ -1,0 +1,19 @@
+# Cache word lists hard (they rarely change)
+#/data/answers.txt
+/data/answers.txt
+  Cache-Control: public, max-age=31536000, immutable
+
+/data/allowed.txt
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cache generated SEO pages and homepage for a short time
+# (fast, but updates within an hour if you change copy)
+# If you want even faster updates, reduce max-age to 300.
+/*.html
+  Cache-Control: public, max-age=3600
+
+# Also cover "pretty URL" pages served as folders with index.html
+# Cloudflare Pages pattern matching is path-based, so this helps directory pages too.
+# (Some crawlers/users hit /foo/ and it serves /foo/index.html)
+/*
+  Cache-Control: public, max-age=3600
