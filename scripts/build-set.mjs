@@ -1,4 +1,4 @@
-console.log("build-seo running");
+console.log("build-set running");
 
 // scripts/build-seo.mjs
 import fs from "node:fs";
