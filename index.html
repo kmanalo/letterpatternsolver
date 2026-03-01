@@ -12,6 +12,8 @@ crossorigin="anonymous"></script>
 <title>5-Letter Word Solver | LetterPatternSolver</title>
 
 <meta name="description" content="Solve Wordle instantly. Enter known letters, include letters, and exclude letters to find matching 5-letter words. Fast and free solver.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://letterpatternsolver.com/">
 
 <style>
 :root{
@@ -45,16 +47,8 @@ body{
   box-shadow:0 10px 30px rgba(0,0,0,0.1);
 }
 
-h1{
-  margin:0;
-  text-align:center;
-}
-
-.subtitle{
-  text-align:center;
-  color:var(--muted);
-  margin:6px 0 18px;
-}
+h1{ margin:0; text-align:center; }
+.subtitle{ text-align:center; color:var(--muted); margin:6px 0 18px; }
 
 .box-row{
   display:grid;
@@ -74,10 +68,7 @@ h1{
   padding:0;
 }
 
-label{
-  display:block;
-  margin-top:10px;
-}
+label{ display:block; margin-top:10px; }
 
 input.text{
   width:100%;
@@ -151,10 +142,6 @@ button.secondary{
   font-weight:600;
 }
 
-.popular a:active{
-  opacity:0.7;
-}
-
 footer{
   margin-top:20px;
   text-align:center;
@@ -180,10 +167,12 @@ footer a{
 <div class="box-row" id="boxes"></div>
 
 <label>Include letters</label>
-<input id="include" class="text" placeholder="e.g. re">
+<input id="include" class="text" placeholder="e.g. re"
+  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
 
 <label>Exclude letters</label>
-<input id="exclude" class="text" placeholder="e.g. snl">
+<input id="exclude" class="text" placeholder="e.g. snl"
+  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
 
 <div class="buttons">
   <button class="secondary" id="doneBtn" type="button">Done</button>
@@ -199,17 +188,17 @@ footer a{
 <div class="seo">
   <h2>How to use this solver</h2>
   <p>
-    Enter known letters in the boxes above (leave unknowns blank). Add letters that must be included or excluded.
+    Enter known letters in the boxes (leave unknowns blank). Add letters that must be included or excluded.
     Results update automatically and can be shared with a link.
   </p>
 
   <h3>Popular searches</h3>
   <div class="popular">
-    <!-- Option B: real, functional links using query parameters -->
-    <a href="/?pattern=___er">5 letter words ending in ER</a>
-    <a href="/?pattern=s____">5 letter words starting with S</a>
-    <a href="/?pattern=__a__">5 letter words with A in the middle</a>
-    <a href="/?include=re">5 letter words with R and E</a>
+    <!-- Option C clean URLs -->
+    <a href="/5-letter-words-ending-in-er/">5 letter words ending in ER</a>
+    <a href="/5-letter-words-starting-with-s/">5 letter words starting with S</a>
+    <a href="/5-letter-words-with-a-in-the-middle/">5 letter words with A in the middle</a>
+    <a href="/5-letter-words-with-r-and-e/">5 letter words with R and E</a>
   </div>
 </div>
 
@@ -242,10 +231,13 @@ function createBoxes(){
     const input = document.createElement("input");
     input.className = "box";
     input.maxLength = 1;
+
+    // Prevent mobile “help”
     input.autocomplete = "off";
-    input.autocapitalize = "characters";
-    input.inputMode = "text";
+    input.autocorrect = "off";
+    input.autocapitalize = "off";
     input.spellcheck = false;
+    input.inputMode = "latin";
 
     input.addEventListener("input", () => {
       input.value = (input.value || "")
@@ -253,11 +245,9 @@ function createBoxes(){
         .slice(0,1)
         .toUpperCase();
 
-      // auto-advance
       if(input.value && input.nextElementSibling){
         input.nextElementSibling.focus();
       }
-
       solve();
     });
 
@@ -270,7 +260,7 @@ function createBoxes(){
     container.appendChild(input);
   }
 
-  // paste support: paste 5 letters to fill row
+  // Paste 5 letters to fill row
   container.addEventListener("paste", (e) => {
     const txt = (e.clipboardData || window.clipboardData).getData("text") || "";
     const paste = txt.toUpperCase().replace(/[^A-Z]/g,"").slice(0,5);
@@ -307,7 +297,6 @@ function hasConstraints(pattern, include, exclude){
 }
 
 function updateUrl(pattern, include, exclude){
-  // Keep shareable links without reloading
   const url = new URL(window.location.href);
 
   if(!hasConstraints(pattern, include, exclude)){
@@ -317,11 +306,8 @@ function updateUrl(pattern, include, exclude){
   }
 
   url.searchParams.set("pattern", pattern);
-  if(include) url.searchParams.set("include", include);
-  else url.searchParams.delete("include");
-
-  if(exclude) url.searchParams.set("exclude", exclude);
-  else url.searchParams.delete("exclude");
+  if(include) url.searchParams.set("include", include); else url.searchParams.delete("include");
+  if(exclude) url.searchParams.set("exclude", exclude); else url.searchParams.delete("exclude");
 
   history.replaceState({}, "", url.toString());
 }
@@ -361,7 +347,6 @@ function solve(){
   const div = document.getElementById("results");
   div.innerHTML = "";
 
-  // cap for UI sanity
   filtered.slice(0, 300).forEach(w => {
     const el = document.createElement("div");
     el.className = "word";
@@ -370,12 +355,8 @@ function solve(){
       try{
         await navigator.clipboard.writeText(w);
         document.getElementById("status").innerText = `Copied ${w.toUpperCase()} to clipboard.`;
-        setTimeout(() => {
-          document.getElementById("status").innerText = "Ready";
-        }, 1200);
-      }catch{
-        // ignore clipboard failures
-      }
+        setTimeout(() => document.getElementById("status").innerText = "Ready", 1200);
+      }catch{}
     });
     div.appendChild(el);
   });
@@ -425,8 +406,6 @@ async function load(){
 
     createBoxes();
     applyParamsFromUrl();
-
-    // Do not dump full list at load unless params actually constrain
     solve();
   }catch(e){
     document.getElementById("status").innerText = "Failed to load word lists.";
@@ -436,7 +415,6 @@ async function load(){
 
 document.getElementById("include").addEventListener("input", solve);
 document.getElementById("exclude").addEventListener("input", solve);
-
 document.getElementById("resetBtn").addEventListener("click", clearAll);
 document.getElementById("doneBtn").addEventListener("click", dismissKeyboard);
 
