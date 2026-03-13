@@ -9,11 +9,43 @@ crossorigin="anonymous"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>5-Letter Word Solver | LetterPatternSolver</title>
+<title>5-Letter Word Solver & Finder | Wordle Helper</title>
 
-<meta name="description" content="Solve Wordle instantly. Enter known letters, include letters, and exclude letters to find matching 5-letter words. Fast and free solver.">
+<meta name="description" content="Free 5-letter word solver and finder for Wordle-style puzzles. Enter known letters, included letters, and excluded letters to narrow matching 5-letter words fast.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://letterpatternsolver.com/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I use this 5-letter word solver?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Enter any known letters in their exact positions, then add letters that must be included or excluded. The solver filters matching 5-letter words instantly in your browser."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this a Wordle helper?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. It works as a Wordle helper by letting you lock known positions, include yellow-letter clues, and remove gray letters from the result list."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does this 5-letter word finder only show answer words?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The page combines a smaller answer-style list with a broader allowed list, deduplicates them, and shows matching 5-letter words."
+      }
+    }
+  ]
+}
+</script>
 
 <style>
 :root{
@@ -176,7 +208,11 @@ footer a{
 <div class="card">
 
 <h1>5-Letter Word Solver</h1>
-<div class="subtitle">Find Wordle candidates instantly</div>
+<div class="subtitle">Free 5-letter word finder and Wordle helper</div>
+
+<p class="subtitle" style="margin-top:-8px;">
+  Enter known letters, include letters, and exclude letters to find matching 5-letter words fast.
+</p>
 
 <div class="box-row" id="boxes"></div>
 
@@ -217,7 +253,8 @@ footer a{
 <div class="seo">
   <h2>How to use this solver</h2>
   <p>
-    Enter known letters in the boxes (leave unknowns blank). Add letters that must be included or excluded.
+    Use this page as a <strong>5-letter word solver</strong>, <strong>5-letter word finder</strong>, or
+    <strong>Wordle helper</strong>. Enter known letters in the boxes, then add letters that must be included or excluded.
     Results update automatically and can be shared with a link.
   </p>
 
@@ -274,6 +311,25 @@ footer a{
   <p>
     This page filters two word lists: a smaller <strong>answer list</strong> and a broader <strong>allowed list</strong>.
     The results shown are the union of both lists, deduplicated and sorted. The solver only matches 5-letter words.
+  </p>
+
+  <h2>FAQ</h2>
+  <h3>What is a 5-letter word solver?</h3>
+  <p>
+    A 5-letter word solver helps you narrow possible words when you know some letters already. This one lets you set
+    exact positions, required letters, and excluded letters to filter matches quickly.
+  </p>
+
+  <h3>Can I use this as a 5-letter word finder for Wordle?</h3>
+  <p>
+    Yes. If you know green-letter positions, place them in the boxes. If you know yellow letters belong somewhere in
+    the word, add them to Include. If you know gray letters should be removed, add them to Exclude.
+  </p>
+
+  <h3>What is the difference between this solver and browsing word lists?</h3>
+  <p>
+    Word lists are useful when you know one broad pattern, like a starting letter or ending. The solver is faster when
+    you know several clues at once and want to narrow them in a single search.
   </p>
 
   <h3>Privacy</h3>
